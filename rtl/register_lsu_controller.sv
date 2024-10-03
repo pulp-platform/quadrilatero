@@ -22,12 +22,22 @@ module register_lsu_controller #(
     output matrix_cps_pkg::lsu_conf_t issued_instr_conf_o  // issued instruction configuration
 );
 
+  localparam int unsigned USAGE_DEPTH = (N_SLOTS > 1) ? $clog2(N_SLOTS) : 1;
+
   logic issue_queue_empty;
   logic start_load;
 
+  logic [USAGE_DEPTH-1:0] issue_queue_inst_usage;
+  logic issue_queue_full;
+  logic issue_queue_almost_full;
+
+  /* verilator lint_off WIDTH */
+  assign issue_queue_almost_full = issue_queue_inst_usage == (N_SLOTS[USAGE_DEPTH:0] - 1);
+  assign issue_queue_full_o = issue_queue_almost_full | issue_queue_full;
+
   matrix_cps_pkg::lsu_instr_t issued_instr_ff;  // issued instruction
   matrix_cps_pkg::lsu_instr_t fifo_data_out;
-  matrix_cps_pkg::lsu_conf_t issued_instr_conf_ff;  // issued instruction configuration
+  matrix_cps_pkg::lsu_conf_t  issued_instr_conf_ff;  // issued instruction configuration
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
@@ -65,8 +75,8 @@ module register_lsu_controller #(
       .flush_i   (1'b0),
       .testmode_i(1'b0),
 
-      .usage_o(  /* unused */),
-      .full_o (issue_queue_full_o),
+      .usage_o(issue_queue_inst_usage),
+      .full_o (issue_queue_full),
       .empty_o(issue_queue_empty),
 
       .data_i(dispatched_instr_i),  // data to push into the queue

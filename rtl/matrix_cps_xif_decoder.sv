@@ -8,19 +8,20 @@
 // Actual decoding of the instruction is delegated to cps_decoder
 
 
-module matrix_cps_xif_decoder#() (
-    input  logic[31:0]             instr_i       ,
-    output xif_pkg::x_issue_resp_t x_issue_resp_o
+module matrix_cps_xif_decoder #(
+) (
+    input  logic                   [31:0] instr_i,
+    output xif_pkg::x_issue_resp_t        x_issue_resp_o
 );
 
   xif_pkg::x_issue_resp_t default_resp;
 
-  xif_pkg::x_issue_resp_t instr_fmmacc_s ;  // FMMACC_S
-  xif_pkg::x_issue_resp_t instr_fmmacc_d ;  // FMMACC_D
-  xif_pkg::x_issue_resp_t instr_fmmacc_h ;  // FMMACC_H
-  xif_pkg::x_issue_resp_t instr_mmaqa_b  ;  // MMAQA_B
-  xif_pkg::x_issue_resp_t instr_mmada_h  ;  // MMADA_H
-  xif_pkg::x_issue_resp_t instr_mmasa_w  ;  // MMASA_W
+  xif_pkg::x_issue_resp_t instr_fmmacc_s;  // FMMACC_S
+  xif_pkg::x_issue_resp_t instr_fmmacc_d;  // FMMACC_D
+  xif_pkg::x_issue_resp_t instr_fmmacc_h;  // FMMACC_H
+  xif_pkg::x_issue_resp_t instr_mmaqa_b;  // MMAQA_B
+  xif_pkg::x_issue_resp_t instr_mmada_h;  // MMADA_H
+  xif_pkg::x_issue_resp_t instr_mmasa_w;  // MMASA_W
   // xif_pkg::x_issue_resp_t instr_mcfg     ;  // MCFG
   // xif_pkg::x_issue_resp_t instr_mcfgk    ;  // MCFGK
   // xif_pkg::x_issue_resp_t instr_mcfgki   ;  // MCFGKI
@@ -28,18 +29,18 @@ module matrix_cps_xif_decoder#() (
   // xif_pkg::x_issue_resp_t instr_mcfgmi   ;  // MCFGMI
   // xif_pkg::x_issue_resp_t instr_mcfgn    ;  // MCFGN
   // xif_pkg::x_issue_resp_t instr_mcfgni   ;  // MCFGNI
-  xif_pkg::x_issue_resp_t instr_mld_b    ;  // MLD_B
+  xif_pkg::x_issue_resp_t instr_mld_b;  // MLD_B
   // xif_pkg::x_issue_resp_t instr_mld_d    ;  // MLD_D
-  xif_pkg::x_issue_resp_t instr_mld_h    ;  // MLD_H
-  xif_pkg::x_issue_resp_t instr_mld_w    ;  // MLD_W
+  xif_pkg::x_issue_resp_t instr_mld_h;  // MLD_H
+  xif_pkg::x_issue_resp_t instr_mld_w;  // MLD_W
   // xif_pkg::x_issue_resp_t instr_mmov_mm  ;  // MMOV_MM
-  xif_pkg::x_issue_resp_t instr_mst_b    ;  // MST_B
+  xif_pkg::x_issue_resp_t instr_mst_b;  // MST_B
   // xif_pkg::x_issue_resp_t instr_mst_d    ;  // MST_D
-  xif_pkg::x_issue_resp_t instr_mst_h    ;  // MST_H
-  xif_pkg::x_issue_resp_t instr_mst_w    ;  // MST_W
-  xif_pkg::x_issue_resp_t instr_mzero    ;  // MZERO
+  xif_pkg::x_issue_resp_t instr_mst_h;  // MST_H
+  xif_pkg::x_issue_resp_t instr_mst_w;  // MST_W
+  xif_pkg::x_issue_resp_t instr_mzero;  // MZERO
 
-  always_comb begin: generate_response
+  always_comb begin : generate_response
     default_resp.accept    = 1'b1;
     default_resp.writeback = 1'b0;
     default_resp.dualwrite = 1'b0;
@@ -48,12 +49,12 @@ module matrix_cps_xif_decoder#() (
     default_resp.ecswrite  = 1'b0;
     default_resp.exc       = 1'b0;
 
-    instr_mmaqa_b  = default_resp;
-    instr_mmada_h  = default_resp;
-    instr_mmasa_w  = default_resp;
-    instr_fmmacc_s = default_resp;
-    instr_fmmacc_d = default_resp;
-    instr_fmmacc_h = default_resp;
+    instr_mmaqa_b          = default_resp;
+    instr_mmada_h          = default_resp;
+    instr_mmasa_w          = default_resp;
+    instr_fmmacc_s         = default_resp;
+    instr_fmmacc_d         = default_resp;
+    instr_fmmacc_h         = default_resp;
     // instr_mcfg     = default_resp;
     // instr_mcfgk    = default_resp;
     // instr_mcfgki   = default_resp;
@@ -61,16 +62,16 @@ module matrix_cps_xif_decoder#() (
     // instr_mcfgmi   = default_resp;
     // instr_mcfgn    = default_resp;
     // instr_mcfgni   = default_resp;
-    instr_mld_b    = default_resp;
-    instr_mld_h    = default_resp;
-    instr_mld_w    = default_resp;
+    instr_mld_b            = default_resp;
+    instr_mld_h            = default_resp;
+    instr_mld_w            = default_resp;
     // instr_mld_d    = default_resp;
     // instr_mmov_mm  = default_resp;
-    instr_mst_b    = default_resp;
-    instr_mst_h    = default_resp;
-    instr_mst_w    = default_resp;
+    instr_mst_b            = default_resp;
+    instr_mst_h            = default_resp;
+    instr_mst_w            = default_resp;
     // instr_mst_d    = default_resp;
-    instr_mzero    = default_resp;
+    instr_mzero            = default_resp;
 
     // instr_mcfg.writeback   = 1'b1;
     // instr_mcfgk.writeback  = 1'b1;
@@ -81,22 +82,22 @@ module matrix_cps_xif_decoder#() (
     // instr_mcfgni.writeback = 1'b1;
   end
 
-  always_comb begin: decoder_block
+  always_comb begin : decoder_block
     unique casez (instr_i)
       matrix_cps_instr_pkg::FMMACC_S: x_issue_resp_o = instr_fmmacc_s;
       matrix_cps_instr_pkg::FMMACC_D: x_issue_resp_o = instr_fmmacc_d;
       matrix_cps_instr_pkg::FMMACC_H: x_issue_resp_o = instr_fmmacc_h;
-      matrix_cps_instr_pkg::MMAQA_B : x_issue_resp_o = instr_mmaqa_b ;
-      matrix_cps_instr_pkg::MMADA_H : x_issue_resp_o = instr_mmada_h ;
-      matrix_cps_instr_pkg::MMASA_W : x_issue_resp_o = instr_mmasa_w ;
-      matrix_cps_instr_pkg::MLD_B   : x_issue_resp_o = instr_mld_b   ;
-      matrix_cps_instr_pkg::MLD_H   : x_issue_resp_o = instr_mld_h   ;
-      matrix_cps_instr_pkg::MLD_W   : x_issue_resp_o = instr_mld_w   ;
-      matrix_cps_instr_pkg::MST_B   : x_issue_resp_o = instr_mst_b   ;
-      matrix_cps_instr_pkg::MST_H   : x_issue_resp_o = instr_mst_h   ;
-      matrix_cps_instr_pkg::MST_W   : x_issue_resp_o = instr_mst_w   ;
-      matrix_cps_instr_pkg::MZERO   : x_issue_resp_o = instr_mzero   ;
-      default                       : x_issue_resp_o = '0;
+      matrix_cps_instr_pkg::MMAQA_B:  x_issue_resp_o = instr_mmaqa_b;
+      matrix_cps_instr_pkg::MMADA_H:  x_issue_resp_o = instr_mmada_h;
+      matrix_cps_instr_pkg::MMASA_W:  x_issue_resp_o = instr_mmasa_w;
+      matrix_cps_instr_pkg::MLD_B:    x_issue_resp_o = instr_mld_b;
+      matrix_cps_instr_pkg::MLD_H:    x_issue_resp_o = instr_mld_h;
+      matrix_cps_instr_pkg::MLD_W:    x_issue_resp_o = instr_mld_w;
+      matrix_cps_instr_pkg::MST_B:    x_issue_resp_o = instr_mst_b;
+      matrix_cps_instr_pkg::MST_H:    x_issue_resp_o = instr_mst_h;
+      matrix_cps_instr_pkg::MST_W:    x_issue_resp_o = instr_mst_w;
+      matrix_cps_instr_pkg::MZERO:    x_issue_resp_o = instr_mzero;
+      default:                        x_issue_resp_o = '0;
     endcase
   end
 
