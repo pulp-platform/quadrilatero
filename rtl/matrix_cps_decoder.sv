@@ -11,18 +11,22 @@ module matrix_cps_decoder
     input logic [31:0] instr_i,
 
     // Signals to the controller
-    output logic [$clog2(matrix_cps_pkg::MAX_NUM_READ_OPERANDS)-1:0]                         n_matrix_operands_read_o,  // how many RF operands are read from RF
-    output logic [        matrix_cps_pkg::MAX_NUM_READ_OPERANDS-1:0][$clog2(N_REGS)-1:0]     rf_read_regs_o          ,  // which registers to read from 
-    output logic                                                    [$clog2(N_REGS)-1:0]     rf_writeback_reg_o      ,  // which register to writeback to 
-    output logic                                                                             rf_writeback_o          ,
-    output logic                                                                             instr_valid_o           ,
-    output logic                                                                             is_store_o              ,
-    output logic                                                                             is_float_o              ,
-    output matrix_cps_pkg::execution_units_t                                                 exec_unit_o             ,
-    output matrix_cps_pkg::datatype_t                                                        datatype_o
+    output logic [$clog2(
+matrix_cps_pkg::MAX_NUM_READ_OPERANDS
+)-1:0] n_matrix_operands_read_o,  // how many RF operands are read from RF
+    output logic [matrix_cps_pkg::MAX_NUM_READ_OPERANDS-1:0][$clog2(
+N_REGS
+)-1:0] rf_read_regs_o,  // which registers to read from 
+    output logic [$clog2(N_REGS)-1:0] rf_writeback_reg_o,  // which register to writeback to 
+    output logic rf_writeback_o,
+    output logic instr_valid_o,
+    output logic is_store_o,
+    output logic is_float_o,
+    output matrix_cps_pkg::execution_units_t exec_unit_o,
+    output matrix_cps_pkg::datatype_t datatype_o
 );
 
-  always_comb begin: decoder_block
+  always_comb begin : decoder_block
     exec_unit_o              = matrix_cps_pkg::FU_SYSTOLIC_ARRAY;
     instr_valid_o            = '0;
     rf_read_regs_o           = '0;
@@ -120,11 +124,11 @@ module matrix_cps_decoder
        end
        */
       matrix_cps_instr_pkg::MLD_B: begin
-        instr_valid_o            = '1;
-        exec_unit_o              = matrix_cps_pkg::FU_LSU;
-        rf_writeback_reg_o       = instr_i[9:7];
-        datatype_o               = matrix_cps_pkg::SIZE_8;
-        rf_writeback_o           = '1;
+        instr_valid_o      = '1;
+        exec_unit_o        = matrix_cps_pkg::FU_LSU;
+        rf_writeback_reg_o = instr_i[9:7];
+        datatype_o         = matrix_cps_pkg::SIZE_8;
+        rf_writeback_o     = '1;
       end
       /*
         matrix_cps_instr_pkg::MLD_D: begin
@@ -134,18 +138,18 @@ module matrix_cps_decoder
         end
       */
       matrix_cps_instr_pkg::MLD_H: begin
-        instr_valid_o            = '1;
-        exec_unit_o              = matrix_cps_pkg::FU_LSU;
-        rf_writeback_reg_o       = instr_i[9:7];
-        datatype_o               = matrix_cps_pkg::SIZE_16;
-        rf_writeback_o           = '1;
+        instr_valid_o      = '1;
+        exec_unit_o        = matrix_cps_pkg::FU_LSU;
+        rf_writeback_reg_o = instr_i[9:7];
+        datatype_o         = matrix_cps_pkg::SIZE_16;
+        rf_writeback_o     = '1;
       end
       matrix_cps_instr_pkg::MLD_W: begin
-        instr_valid_o            = '1;
-        exec_unit_o              = matrix_cps_pkg::FU_LSU;
-        rf_writeback_reg_o       = instr_i[9:7];
-        datatype_o               = matrix_cps_pkg::SIZE_32;
-        rf_writeback_o           = '1;
+        instr_valid_o      = '1;
+        exec_unit_o        = matrix_cps_pkg::FU_LSU;
+        rf_writeback_reg_o = instr_i[9:7];
+        datatype_o         = matrix_cps_pkg::SIZE_32;
+        rf_writeback_o     = '1;
       end
       /*
          matrix_cps_instr_pkg::MMOV_MM    : begin
@@ -157,7 +161,7 @@ module matrix_cps_decoder
         datatype_o               = matrix_cps_pkg::SIZE_8;
         n_matrix_operands_read_o = 1;
         rf_read_regs_o[0]        = instr_i[9:7];
-        is_store_o = '1;
+        is_store_o               = '1;
       end
       /*
         matrix_cps_instr_pkg::MST_D: begin
@@ -172,7 +176,7 @@ module matrix_cps_decoder
         datatype_o               = matrix_cps_pkg::SIZE_16;
         n_matrix_operands_read_o = 1;
         rf_read_regs_o[0]        = instr_i[9:7];
-        is_store_o = '1;
+        is_store_o               = '1;
       end
       matrix_cps_instr_pkg::MST_W: begin
         instr_valid_o            = '1;
@@ -180,14 +184,14 @@ module matrix_cps_decoder
         datatype_o               = matrix_cps_pkg::SIZE_32;
         n_matrix_operands_read_o = 1;
         rf_read_regs_o[0]        = instr_i[9:7];
-        is_store_o = '1;
+        is_store_o               = '1;
       end
       matrix_cps_instr_pkg::MZERO: begin
-        instr_valid_o            = '1;
-        exec_unit_o              = matrix_cps_pkg::FU_RF;
-        rf_writeback_reg_o       = instr_i[17:15];
-        datatype_o               = matrix_cps_pkg::SIZE_32;
-        rf_writeback_o           = '1;
+        instr_valid_o      = '1;
+        exec_unit_o        = matrix_cps_pkg::FU_RF;
+        rf_writeback_reg_o = instr_i[17:15];
+        datatype_o         = matrix_cps_pkg::SIZE_32;
+        rf_writeback_o     = '1;
       end
       default: begin
       end

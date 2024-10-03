@@ -45,20 +45,20 @@ module matrix_cps_to_obi
   // Internal signals and parameters
   localparam int N_PLL_PORTS = matrix_cps_pkg::BUS_WIDTH / 32;
 
-  obi_req_t                                    matrix_req[0:N_PLL_PORTS-1];
-  obi_resp_t                                   matrix_rsp[0:N_PLL_PORTS-1];
+  obi_req_t                                    matrix_req [0:N_PLL_PORTS-1];
+  obi_resp_t                                   matrix_rsp [0:N_PLL_PORTS-1];
 
-  logic      [              N_PLL_PORTS-1 : 0] gnt_q      ;
-  logic      [              N_PLL_PORTS-1 : 0] gnt_d      ;
-  logic      [              N_PLL_PORTS-1 : 0] rvalid_q   ;
-  logic      [              N_PLL_PORTS-1 : 0] rvalid_d   ;
-  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata_q    ;
-  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata_d    ;
-  logic      [              N_PLL_PORTS-1 : 0] gnt        ;
-  logic      [              N_PLL_PORTS-1 : 0] rvalid     ;
-  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata      ;
-  logic                                        all_gnt    ;
-  logic                                        all_rvalid ;
+  logic      [              N_PLL_PORTS-1 : 0] gnt_q;
+  logic      [              N_PLL_PORTS-1 : 0] gnt_d;
+  logic      [              N_PLL_PORTS-1 : 0] rvalid_q;
+  logic      [              N_PLL_PORTS-1 : 0] rvalid_d;
+  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata_q;
+  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata_d;
+  logic      [              N_PLL_PORTS-1 : 0] gnt;
+  logic      [              N_PLL_PORTS-1 : 0] rvalid;
+  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata;
+  logic                                        all_gnt;
+  logic                                        all_rvalid;
 
   assign all_gnt    = &gnt   ;
   assign all_rvalid = &rvalid;
@@ -74,7 +74,7 @@ module matrix_cps_to_obi
 
       gnt[ii]    = matrix_rsp[ii].gnt    | gnt_q[ii]   ;
       rvalid[ii] = matrix_rsp[ii].rvalid | rvalid_q[ii];
-      
+
       rdata[32*ii+:32] = (rvalid_q[ii]) ? rdata_q[32*ii+:32] : matrix_rsp[ii].rdata;
 
     end
@@ -89,11 +89,11 @@ module matrix_cps_to_obi
     for (int ii = 0; ii < N_PLL_PORTS; ii++) begin
 
       // Grant
-      if( all_gnt ) begin
+      if (all_gnt) begin
         gnt_d[ii] = 1'b0;
       end else if (matrix_rsp[ii].gnt) begin
         gnt_d[ii] = 1'b1;
-      end 
+      end
 
       // Read Valid
       if (all_rvalid) begin
@@ -103,7 +103,7 @@ module matrix_cps_to_obi
       end
 
       // Read Data
-      if (matrix_rsp[ii].rvalid &~ all_rvalid) begin
+      if (matrix_rsp[ii].rvalid & ~all_rvalid) begin
         rdata_d[32*ii+:32] = matrix_rsp[ii].rdata;
       end
 
@@ -125,10 +125,10 @@ module matrix_cps_to_obi
   end
 
   // Input re-assignment  -- MODIFY IF BUS_WIDTH != 128
-  assign matrix_rsp[0] = matrix_cps_ch0_resp_i;
-  assign matrix_rsp[1] = matrix_cps_ch1_resp_i;
-  assign matrix_rsp[2] = matrix_cps_ch2_resp_i;
-  assign matrix_rsp[3] = matrix_cps_ch3_resp_i;
+  assign matrix_rsp[0]        = matrix_cps_ch0_resp_i;
+  assign matrix_rsp[1]        = matrix_cps_ch1_resp_i;
+  assign matrix_rsp[2]        = matrix_cps_ch2_resp_i;
+  assign matrix_rsp[3]        = matrix_cps_ch3_resp_i;
 
   // Output re-assignment  -- MODIFY IF BUS_WIDTH != 128
   assign matrix_cps_ch0_req_o = matrix_req[0];
@@ -136,9 +136,9 @@ module matrix_cps_to_obi
   assign matrix_cps_ch2_req_o = matrix_req[2];
   assign matrix_cps_ch3_req_o = matrix_req[3];
 
-  assign mem_gnt_o    = all_gnt   ;
-  assign mem_rvalid_o = all_rvalid;
-  assign mem_rdata_o  = rdata     ;
+  assign mem_gnt_o            = all_gnt;
+  assign mem_rvalid_o         = all_rvalid;
+  assign mem_rdata_o          = rdata;
 
 
   // Assertions -- MODIFY IF BUS_WIDTH != 128
