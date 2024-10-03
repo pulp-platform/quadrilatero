@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
 // Author: Saverio Nasturzio
+// Author: Davide Schiavone
 
 module systolic_array_controller #(
     parameter N_SLOTS = 3,

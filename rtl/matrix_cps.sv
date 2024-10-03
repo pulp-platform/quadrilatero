@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
 // Author: Danilo Cammarata
+// Author: Davide Schiavone
 
 // verilator lint_off UNUSED
 module matrix_cps

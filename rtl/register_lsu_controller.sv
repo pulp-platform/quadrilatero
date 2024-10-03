@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
 // Author: Saverio Nasturzio
+// Author: Davide Schiavone
 
 module register_lsu_controller #(
     parameter N_SLOTS = 3
