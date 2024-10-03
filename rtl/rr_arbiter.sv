@@ -9,52 +9,52 @@ module rr_arbiter #(
     parameter N_ROWS = 4   ,
     parameter WIDTH = 8
 ) (
-    input  logic             clk_i  ,
-    input  logic             rst_ni ,
-    input  logic [WIDTH-1:0] req_i  ,
+    input  logic             clk_i,
+    input  logic             rst_ni,
+    input  logic [WIDTH-1:0] req_i,
     output logic [WIDTH-1:0] grant_o
 );
 
-  logic [WIDTH-1:0]          base_q;
-  logic [WIDTH-1:0]          new_base;
-  logic [WIDTH-1:0]          base_d;
-  logic [2*WIDTH-1:0]        double_req; 
-  logic [WIDTH-1:0]          grant;
-  logic [2*WIDTH-1:0]        double_grant;
+  logic [         WIDTH-1:0] base_q;
+  logic [         WIDTH-1:0] new_base;
+  logic [         WIDTH-1:0] base_d;
+  logic [       2*WIDTH-1:0] double_req;
+  logic [         WIDTH-1:0] grant;
+  logic [       2*WIDTH-1:0] double_grant;
   logic [$clog2(N_ROWS)-1:0] cnt_d;
   logic [$clog2(N_ROWS)-1:0] cnt_q;
-  int act;
-  
+  int                        act;
+
   always_comb begin
-    double_req   = {req_i,req_i};
+    double_req   = {req_i, req_i};
     double_grant = '0;
     grant_o      = '0;
     new_base     = '0;
 
-    act = 0;
-    for(int ii= $clog2(base_q); ii< $clog2(base_q)+WIDTH; ii++) begin
-      if(double_req[ii]) begin
+    act          = 0;
+    for (int ii = $clog2(base_q); ii < $clog2(base_q) + WIDTH; ii++) begin
+      if (double_req[ii]) begin
         act += 1;
         double_grant[ii] = 1'b1;
-        if(act == NumActOut) begin
+        if (act == NumActOut) begin
           new_base[ii%WIDTH] = 1'b1;
-          break; 
+          break;
         end
       end
     end
 
     grant_o = double_grant[WIDTH-1:0] | double_grant[2*WIDTH-1:WIDTH];
     cnt_d   = (|grant_o) ? cnt_q + 1 : cnt_q;
-    base_d  = ((cnt_q == N_ROWS-1) && |new_base) ? new_base : base_q;
+    base_d  = ((cnt_q == N_ROWS - 1) && |new_base) ? new_base : base_q;
   end
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) begin 
-      base_q <=  1;
+    if (!rst_ni) begin
+      base_q <= 1;
       cnt_q  <= '0;
     end else begin
       base_q <= base_d;
-      cnt_q  <= cnt_d ;
+      cnt_q  <= cnt_d;
     end
   end
 endmodule

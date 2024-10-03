@@ -5,20 +5,20 @@
 // Author: Saverio Nasturzio
 package matrix_cps_pkg;
 
-  parameter int unsigned N_REGS                 =   8;
-  parameter int unsigned DATA_WIDTH             =  32;
-  parameter int unsigned BUS_WIDTH              = 128;
-  parameter int unsigned MESH_WIDTH             =   4;
-  parameter int unsigned NUM_EXEC_UNITS         =   3;  // change me to add units
-  parameter int unsigned MAX_NUM_READ_OPERANDS  =   3;
-  parameter int unsigned MAX_NUM_WRITE_OPERANDS =   1;
+  parameter int unsigned N_REGS = 8;
+  parameter int unsigned DATA_WIDTH = 32;
+  parameter int unsigned BUS_WIDTH = 128;
+  parameter int unsigned MESH_WIDTH = 4;
+  parameter int unsigned NUM_EXEC_UNITS = 3;  // change me to add units
+  parameter int unsigned MAX_NUM_READ_OPERANDS = 3;
+  parameter int unsigned MAX_NUM_WRITE_OPERANDS = 1;
   parameter int unsigned READ_PORTS             =   4;  // we'll have fewer write ports so we take the maximum one which is the number of READ PORTS for the rw_queue_t
-  parameter int unsigned WRITE_PORTS            =   3;  //
-  parameter int unsigned RF_READ_PORTS          =   4;
-  parameter int unsigned RF_WRITE_PORTS         =   3;
+  parameter int unsigned WRITE_PORTS = 3;  //
+  parameter int unsigned RF_READ_PORTS = 4;
+  parameter int unsigned RF_WRITE_PORTS = 3;
 
-  localparam int unsigned N_ROWS = MESH_WIDTH             ;
-  localparam int unsigned RLEN   = DATA_WIDTH * MESH_WIDTH;
+  localparam int unsigned N_ROWS = MESH_WIDTH;
+  localparam int unsigned RLEN = DATA_WIDTH * MESH_WIDTH;
 
 
   typedef enum logic [2:0] {
@@ -33,11 +33,11 @@ package matrix_cps_pkg;
   } sa_ctrl_t;
 
   typedef struct packed {
-    logic [$clog2(N_REGS)-1:0]      data_reg  ;
-    logic [$clog2(N_REGS)-1:0]      acc_reg   ;
+    logic [$clog2(N_REGS)-1:0]      data_reg;
+    logic [$clog2(N_REGS)-1:0]      acc_reg;
     logic [$clog2(N_REGS)-1:0]      weight_reg;
-    logic [xif_pkg::X_ID_WIDTH-1:0] id        ;
-    sa_ctrl_t                       sa_ctrl   ;
+    logic [xif_pkg::X_ID_WIDTH-1:0] id;
+    sa_ctrl_t                       sa_ctrl;
   } sa_instr_t;
 
   typedef struct packed {
@@ -54,13 +54,13 @@ package matrix_cps_pkg;
   } lsu_conf_t;
 
   typedef struct packed {
-    logic [xif_pkg::X_ID_WIDTH-1:0] id;  
-    logic                           rvalid;  
-    logic                           wready;     
+    logic [xif_pkg::X_ID_WIDTH-1:0] id;
+    logic                           rvalid;
+    logic                           wready;
   } rw_queue_t;
 
   localparam int unsigned WR_PORT = (WRITE_PORTS > 1) ? $clog2(WRITE_PORTS) : 1;
-  localparam int unsigned RD_PORT = (READ_PORTS  > 1) ? $clog2(READ_PORTS ) : 1;
+  localparam int unsigned RD_PORT = (READ_PORTS > 1) ? $clog2(READ_PORTS) : 1;
   typedef enum logic [RD_PORT-1:0] {
     SYSTOLIC_ARRAY_W,
     SYSTOLIC_ARRAY_D,
@@ -75,7 +75,9 @@ package matrix_cps_pkg;
   } write_ports_t;
 
   // Int formats
-  typedef enum logic [$clog2(NUM_EXEC_UNITS)-1:0] {
+  typedef enum logic [$clog2(
+NUM_EXEC_UNITS
+)-1:0] {
     FU_SYSTOLIC_ARRAY = 0,
     FU_LSU,
     FU_RF
@@ -83,8 +85,10 @@ package matrix_cps_pkg;
   } execution_units_t;
 
 
-  localparam int unsigned WR_OPS = (MAX_NUM_WRITE_OPERANDS > 1) ? $clog2(MAX_NUM_WRITE_OPERANDS) : 1;
-  localparam int unsigned RD_OPS = (MAX_NUM_READ_OPERANDS  > 1) ? $clog2(MAX_NUM_READ_OPERANDS ) : 1;
+  localparam int unsigned WR_OPS = (MAX_NUM_WRITE_OPERANDS > 1) ? $clog2(
+      MAX_NUM_WRITE_OPERANDS
+  ) : 1;
+  localparam int unsigned RD_OPS = (MAX_NUM_READ_OPERANDS > 1) ? $clog2(MAX_NUM_READ_OPERANDS) : 1;
   typedef struct packed {
     logic [RD_OPS-1:0] n_read_ports;
     logic [WR_OPS-1:0] n_write_ports;

@@ -116,7 +116,7 @@ module ff_fs_dr_stage #(
   // assign acc_rdata_ready_o = data_acc_valid;
 
   assign data_rdata_ready_o = (state == FF);
-  assign acc_rdata_ready_o  = (state == FF);
+  assign acc_rdata_ready_o = (state == FF);
 
   assign ff_ready_o = state == IDLE;
 
