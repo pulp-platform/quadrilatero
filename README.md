@@ -6,3 +6,5 @@ It has been developed at the Embedded System Laboratory (ESL) at EPFL.
 It uses the CORE-V-X-IF interface to interface with the `OpenHW Group` CPUs and the OBI protocol to interface with memories.
 
 An `LLVM` extended with the proposed instructions is available [here](https://github.com/epfl-systemf/rvm-compiler-project)
+
+The files are released under Apache License 2.0 (`Apache-2.0`), see `License`
