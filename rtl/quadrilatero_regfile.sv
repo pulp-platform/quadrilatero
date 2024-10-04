@@ -4,7 +4,7 @@
 //
 // Author: Saverio Nasturzio
 
-module matrix_cps_regfile #(
+module quadrilatero_regfile #(
     parameter READ_PORTS = 3,  // number of read ports of the register file
     parameter WRITE_PORTS = 2,  // number of write ports 
     parameter N_REGS = 8,  // how many registers

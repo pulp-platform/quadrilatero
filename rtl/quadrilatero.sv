@@ -6,8 +6,8 @@
 // Author: Davide Schiavone
 
 // verilator lint_off UNUSED
-module matrix_cps
-  import matrix_cps_pkg::*;
+module quadrilatero
+  import quadrilatero_pkg::*;
   import xif_pkg::*;
 #(
     parameter INPUT_BUFFER_DEPTH = 4,  // 0 means no input buffer 
@@ -19,14 +19,14 @@ module matrix_cps
     input logic rst_ni,
 
     // Memory Interface to OBI
-    output logic                                     mem_req_o,
-    output logic                                     mem_we_o,
-    output logic [ matrix_cps_pkg::BUS_WIDTH/8 -1:0] mem_be_o,
-    output logic [                             31:0] mem_addr_o,
-    output logic [matrix_cps_pkg::BUS_WIDTH  -1 : 0] mem_wdata_o,
-    input  logic                                     mem_gnt_i,
-    input  logic                                     mem_rvalid_i,
-    input  logic [  matrix_cps_pkg::BUS_WIDTH - 1:0] mem_rdata_i,
+    output logic                                       mem_req_o,
+    output logic                                       mem_we_o,
+    output logic [ quadrilatero_pkg::BUS_WIDTH/8 -1:0] mem_be_o,
+    output logic [                               31:0] mem_addr_o,
+    output logic [quadrilatero_pkg::BUS_WIDTH  -1 : 0] mem_wdata_o,
+    input  logic                                       mem_gnt_i,
+    input  logic                                       mem_rvalid_i,
+    input  logic [  quadrilatero_pkg::BUS_WIDTH - 1:0] mem_rdata_i,
 
     // Compressed Interface
     input  logic               x_compressed_valid_i,  // unused
@@ -94,12 +94,12 @@ module matrix_cps
   logic decoder_instr_valid;
   logic decoder_is_store_out;
   logic decoder_is_float_out;
-  matrix_cps_pkg::execution_units_t decoder_exec_unit;
-  matrix_cps_pkg::datatype_t decoder_datatype_out;
-  logic [matrix_cps_pkg::MAX_NUM_READ_OPERANDS-1:0][$clog2(
-matrix_cps_pkg::N_REGS
+  quadrilatero_pkg::execution_units_t decoder_exec_unit;
+  quadrilatero_pkg::datatype_t decoder_datatype_out;
+  logic [quadrilatero_pkg::MAX_NUM_READ_OPERANDS-1:0][$clog2(
+quadrilatero_pkg::N_REGS
 )-1:0] decoder_rf_read_regs;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] decoder_rf_writeback_reg;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] decoder_rf_writeback_reg;
 
 
   // Dispatcher
@@ -108,72 +108,72 @@ matrix_cps_pkg::N_REGS
   logic dispatcher_is_float_out;
   logic dispatcher_instr_valid;
   logic dispatcher_instr_ready;
-  matrix_cps_pkg::rw_queue_t [matrix_cps_pkg::N_REGS-1 : 0] dispatcher_rw_queue_entry;
-  logic [matrix_cps_pkg::N_REGS-1 : 0] dispatcher_rw_queue_push;
-  logic [matrix_cps_pkg::N_REGS-1 : 0] dispatcher_rw_queue_full;
-  logic [$clog2(matrix_cps_pkg::MAX_NUM_READ_OPERANDS)-1:0] dispatcher_n_matrix_operands_read;
-  logic [matrix_cps_pkg::MAX_NUM_READ_OPERANDS-1 : 0][$clog2(
-matrix_cps_pkg::N_REGS
+  quadrilatero_pkg::rw_queue_t [quadrilatero_pkg::N_REGS-1 : 0] dispatcher_rw_queue_entry;
+  logic [quadrilatero_pkg::N_REGS-1 : 0] dispatcher_rw_queue_push;
+  logic [quadrilatero_pkg::N_REGS-1 : 0] dispatcher_rw_queue_full;
+  logic [$clog2(quadrilatero_pkg::MAX_NUM_READ_OPERANDS)-1:0] dispatcher_n_matrix_operands_read;
+  logic [quadrilatero_pkg::MAX_NUM_READ_OPERANDS-1 : 0][$clog2(
+quadrilatero_pkg::N_REGS
 )-1:0] dispatcher_rf_read_regs;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] dispatcher_rf_writeback_reg;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] dispatcher_reg_ms1;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] dispatcher_reg_ms2;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] dispatcher_reg_ms3;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] dispatcher_reg_md;
-  logic [matrix_cps_pkg::NUM_EXEC_UNITS-1 : 0] dispatcher_issue_queue_full;
-  logic [matrix_cps_pkg::NUM_EXEC_UNITS-1 : 0] dispatcher_dispatch;
-  matrix_cps_pkg::execution_units_t dispatcher_exec_unit;
-  matrix_cps_pkg::datatype_t dispatcher_instr_datatype_out;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] dispatcher_rf_writeback_reg;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] dispatcher_reg_ms1;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] dispatcher_reg_ms2;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] dispatcher_reg_ms3;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] dispatcher_reg_md;
+  logic [quadrilatero_pkg::NUM_EXEC_UNITS-1 : 0] dispatcher_issue_queue_full;
+  logic [quadrilatero_pkg::NUM_EXEC_UNITS-1 : 0] dispatcher_dispatch;
+  quadrilatero_pkg::execution_units_t dispatcher_exec_unit;
+  quadrilatero_pkg::datatype_t dispatcher_instr_datatype_out;
   logic [xif_pkg::X_NUM_RS  -1:0                          ][xif_pkg::X_RFR_WIDTH-1:0          ] dispatcher_rs_out                ;  // Register file source operands for the offloaded instruction
   logic [xif_pkg::X_NUM_RS  -1:0                          ]                                     dispatcher_rs_valid_out          ;  // Validity of the register file source operand(s)
   logic [xif_pkg::X_ID_WIDTH-1:0] dispatcher_instr_id_out;
 
 
   // RF Sequencer
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0][$clog2(
-matrix_cps_pkg::N_REGS
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0][$clog2(
+quadrilatero_pkg::N_REGS
 )-1:0] rf_seq_raddr_from_fu;
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0][$clog2(
-matrix_cps_pkg::N_ROWS
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0][$clog2(
+quadrilatero_pkg::N_ROWS
 )-1:0] rf_seq_rrowaddr_from_fu;
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0][matrix_cps_pkg::RLEN-1:0] rf_seq_rdata_from_fu;
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0] rf_seq_rvalid_from_fu;
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0] rf_seq_rlast_from_fu;
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0] rf_seq_rready_from_fu;
-  logic [matrix_cps_pkg::READ_PORTS-1 : 0][xif_pkg::X_ID_WIDTH-1:0] rf_seq_rd_id_from_fu;
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0][quadrilatero_pkg::RLEN-1:0] rf_seq_rdata_from_fu;
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0] rf_seq_rvalid_from_fu;
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0] rf_seq_rlast_from_fu;
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0] rf_seq_rready_from_fu;
+  logic [quadrilatero_pkg::READ_PORTS-1 : 0][xif_pkg::X_ID_WIDTH-1:0] rf_seq_rd_id_from_fu;
 
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0][$clog2(
-matrix_cps_pkg::N_REGS
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0][$clog2(
+quadrilatero_pkg::N_REGS
 )-1:0] rf_seq_waddr_from_fu;
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0][$clog2(
-matrix_cps_pkg::N_ROWS
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0][$clog2(
+quadrilatero_pkg::N_ROWS
 )-1:0] rf_seq_wrowaddr_from_fu;
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0][matrix_cps_pkg::RLEN-1:0] rf_seq_wdata_from_fu;
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0] rf_seq_we_from_fu;
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0] rf_seq_wlast_from_fu;
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0] rf_seq_wready_from_fu;
-  logic [matrix_cps_pkg::WRITE_PORTS-1 : 0][xif_pkg::X_ID_WIDTH-1:0] rf_seq_wr_id_from_fu;
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0][quadrilatero_pkg::RLEN-1:0] rf_seq_wdata_from_fu;
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0] rf_seq_we_from_fu;
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0] rf_seq_wlast_from_fu;
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0] rf_seq_wready_from_fu;
+  logic [quadrilatero_pkg::WRITE_PORTS-1 : 0][xif_pkg::X_ID_WIDTH-1:0] rf_seq_wr_id_from_fu;
 
-  logic [matrix_cps_pkg::RF_READ_PORTS-1 : 0][$clog2(
-matrix_cps_pkg::N_REGS
+  logic [quadrilatero_pkg::RF_READ_PORTS-1 : 0][$clog2(
+quadrilatero_pkg::N_REGS
 )-1:0] rf_seq_raddr_to_rf;
-  logic [matrix_cps_pkg::RF_READ_PORTS-1 : 0][$clog2(
-matrix_cps_pkg::N_ROWS
+  logic [quadrilatero_pkg::RF_READ_PORTS-1 : 0][$clog2(
+quadrilatero_pkg::N_ROWS
 )-1:0] rf_seq_rrowaddr_to_rf;
-  logic [matrix_cps_pkg::RF_READ_PORTS-1 : 0][matrix_cps_pkg::RLEN-1:0] rf_seq_rdata_to_rf;
+  logic [quadrilatero_pkg::RF_READ_PORTS-1 : 0][quadrilatero_pkg::RLEN-1:0] rf_seq_rdata_to_rf;
 
-  logic [matrix_cps_pkg::RF_WRITE_PORTS-1:0][$clog2(
-matrix_cps_pkg::N_REGS
+  logic [quadrilatero_pkg::RF_WRITE_PORTS-1:0][$clog2(
+quadrilatero_pkg::N_REGS
 )-1:0] rf_seq_waddr_to_rf;
-  logic [matrix_cps_pkg::RF_WRITE_PORTS-1:0][$clog2(
-matrix_cps_pkg::N_ROWS
+  logic [quadrilatero_pkg::RF_WRITE_PORTS-1:0][$clog2(
+quadrilatero_pkg::N_ROWS
 )-1:0] rf_seq_wrowaddr_to_rf;
-  logic [matrix_cps_pkg::RF_WRITE_PORTS-1:0][matrix_cps_pkg::RLEN-1:0] rf_seq_wdata_to_rf;
-  logic [matrix_cps_pkg::RF_WRITE_PORTS-1:0] rf_seq_we_to_rf;
+  logic [quadrilatero_pkg::RF_WRITE_PORTS-1:0][quadrilatero_pkg::RLEN-1:0] rf_seq_wdata_to_rf;
+  logic [quadrilatero_pkg::RF_WRITE_PORTS-1:0] rf_seq_we_to_rf;
 
-  matrix_cps_pkg::rw_queue_t [matrix_cps_pkg::N_REGS-1:0] rf_seq_rw_queue_entry;
-  logic [matrix_cps_pkg::N_REGS-1:0] rf_seq_rw_queue_push;
-  logic [matrix_cps_pkg::N_REGS-1:0] rf_seq_rw_queue_full;
+  quadrilatero_pkg::rw_queue_t [quadrilatero_pkg::N_REGS-1:0] rf_seq_rw_queue_entry;
+  logic [quadrilatero_pkg::N_REGS-1:0] rf_seq_rw_queue_push;
+  logic [quadrilatero_pkg::N_REGS-1:0] rf_seq_rw_queue_full;
 
 
   // Systolic Array Controller
@@ -181,8 +181,8 @@ matrix_cps_pkg::N_ROWS
   logic sa_ctrl_dispatch;
   logic sa_ctrl_wl_ready;
   logic sa_ctrl_start;
-  matrix_cps_pkg::sa_instr_t sa_ctrl_dispatched_instr;
-  matrix_cps_pkg::sa_instr_t sa_ctrl_issued_instr;
+  quadrilatero_pkg::sa_instr_t sa_ctrl_dispatched_instr;
+  quadrilatero_pkg::sa_instr_t sa_ctrl_issued_instr;
 
 
   // Systolic Array
@@ -190,31 +190,31 @@ matrix_cps_pkg::N_ROWS
   logic sa_weight_rdata_ready;
   logic sa_weight_rlast;
   logic [xif_pkg::X_ID_WIDTH-1:0] sa_input_id;
-  logic [matrix_cps_pkg::RLEN-1:0] sa_weight_rdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] sa_weight_raddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] sa_weight_rrowaddr;
+  logic [quadrilatero_pkg::RLEN-1:0] sa_weight_rdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] sa_weight_raddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] sa_weight_rrowaddr;
 
   logic sa_data_rdata_valid;
   logic sa_data_rdata_ready;
   logic sa_data_rlast;
   logic [xif_pkg::X_ID_WIDTH-1:0] sa_output_id;
-  logic [matrix_cps_pkg::RLEN-1:0] sa_data_rdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] sa_data_raddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] sa_data_rrowaddr;
+  logic [quadrilatero_pkg::RLEN-1:0] sa_data_rdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] sa_data_raddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] sa_data_rrowaddr;
 
   logic sa_acc_rdata_valid;
   logic sa_acc_rdata_ready;
   logic sa_acc_rlast;
-  logic [matrix_cps_pkg::RLEN-1:0] sa_acc_rdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] sa_acc_raddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] sa_acc_rrowaddr;
+  logic [quadrilatero_pkg::RLEN-1:0] sa_acc_rdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] sa_acc_raddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] sa_acc_rrowaddr;
 
   logic sa_res_we;
   logic sa_res_wready;
   logic sa_res_wlast;
-  logic [matrix_cps_pkg::RLEN-1:0] sa_res_wdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] sa_res_waddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] sa_res_wrowaddr;
+  logic [quadrilatero_pkg::RLEN-1:0] sa_res_wdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] sa_res_waddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] sa_res_wrowaddr;
 
   logic sa_finished;
   logic sa_finished_ack;
@@ -226,10 +226,10 @@ matrix_cps_pkg::N_ROWS
   logic lsu_ctrl_dispatch;
   logic lsu_ctrl_busy;
   logic lsu_ctrl_start;
-  matrix_cps_pkg::lsu_instr_t lsu_ctrl_dispatched_instr;
-  matrix_cps_pkg::lsu_conf_t lsu_ctrl_csr_config;
-  matrix_cps_pkg::lsu_instr_t lsu_ctrl_issued_instr;
-  matrix_cps_pkg::lsu_conf_t lsu_ctrl_issued_instr_conf;
+  quadrilatero_pkg::lsu_instr_t lsu_ctrl_dispatched_instr;
+  quadrilatero_pkg::lsu_conf_t lsu_ctrl_csr_config;
+  quadrilatero_pkg::lsu_instr_t lsu_ctrl_issued_instr;
+  quadrilatero_pkg::lsu_conf_t lsu_ctrl_issued_instr_conf;
 
 
   // LSU
@@ -238,24 +238,24 @@ matrix_cps_pkg::N_ROWS
   logic lsu_data_rvalid;
   logic [31:0] lsu_data_addr;
   logic lsu_data_we;
-  logic [matrix_cps_pkg::BUS_WIDTH/8-1:0] lsu_data_be;
-  logic [matrix_cps_pkg::BUS_WIDTH  -1:0] lsu_data_rdata;
-  logic [matrix_cps_pkg::BUS_WIDTH  -1:0] lsu_data_wdata;
+  logic [quadrilatero_pkg::BUS_WIDTH/8-1:0] lsu_data_be;
+  logic [quadrilatero_pkg::BUS_WIDTH  -1:0] lsu_data_rdata;
+  logic [quadrilatero_pkg::BUS_WIDTH  -1:0] lsu_data_wdata;
 
   logic lsu_we;
   logic lsu_wlast;
   logic lsu_wready;
   logic [xif_pkg::X_ID_WIDTH-1:0] lsu_id;
-  logic [matrix_cps_pkg::RLEN-1:0] lsu_wdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] lsu_waddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] lsu_wrowaddr;
+  logic [quadrilatero_pkg::RLEN-1:0] lsu_wdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] lsu_waddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] lsu_wrowaddr;
 
   logic lsu_rlast;
   logic lsu_rready;
   logic lsu_rvalid;
-  logic [matrix_cps_pkg::RLEN-1:0] lsu_rdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] lsu_raddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] lsu_rrowaddr;
+  logic [quadrilatero_pkg::RLEN-1:0] lsu_rdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] lsu_raddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] lsu_rrowaddr;
 
   logic lsu_busy;
   logic lsu_finished;
@@ -274,10 +274,10 @@ matrix_cps_pkg::N_ROWS
   logic [xif_pkg::X_ID_WIDTH-1:0] perm_unit_id;
   logic [xif_pkg::X_ID_WIDTH-1:0] perm_unit_instr_id;
   logic [xif_pkg::X_ID_WIDTH-1:0] perm_unit_finished_instr_id;
-  logic [matrix_cps_pkg::RLEN-1:0] perm_unit_wdata;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] perm_unit_waddr;
-  logic [$clog2(matrix_cps_pkg::N_ROWS)-1:0] perm_unit_wrowaddr;
-  logic [$clog2(matrix_cps_pkg::N_REGS)-1:0] perm_unit_reg;
+  logic [quadrilatero_pkg::RLEN-1:0] perm_unit_wdata;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] perm_unit_waddr;
+  logic [$clog2(quadrilatero_pkg::N_ROWS)-1:0] perm_unit_wrowaddr;
+  logic [$clog2(quadrilatero_pkg::N_REGS)-1:0] perm_unit_reg;
 
 
   // Result Interface
@@ -292,9 +292,9 @@ matrix_cps_pkg::N_ROWS
   logic [NUM_EXEC_UNITS-1:0] x_res_finished;
   logic [NUM_EXEC_UNITS-1:0] x_res_finished_ack;
   logic [NUM_EXEC_UNITS-1:0][xif_pkg::X_ID_WIDTH-1:0] x_res_finished_id;
-  logic [$clog2(matrix_cps_pkg::NUM_EXEC_UNITS)-1:0] x_res_selected_fu;
+  logic [$clog2(quadrilatero_pkg::NUM_EXEC_UNITS)-1:0] x_res_selected_fu;
 
-  matrix_cps_pkg::rw_queue_t [matrix_cps_pkg::N_REGS-1:0][matrix_cps_pkg::N_ROWS-1:0] scoreboard;
+  quadrilatero_pkg::rw_queue_t [quadrilatero_pkg::N_REGS-1:0][quadrilatero_pkg::N_ROWS-1:0] scoreboard;
 
 
   //*************************************************************************************************
@@ -348,7 +348,7 @@ matrix_cps_pkg::N_ROWS
   end
 
   // Handles the Issue Interface handshake
-  matrix_cps_xif_decoder xif_decoder_inst (
+  quadrilatero_xif_decoder xif_decoder_inst (
       .instr_i(x_issue_req_i.instr),
       .x_issue_resp_o
   );
@@ -430,7 +430,7 @@ matrix_cps_pkg::N_ROWS
 
   assign instr = in_buf_pop_data.instr_data;
 
-  matrix_cps_decoder #() decoder_inst (
+  quadrilatero_decoder #() decoder_inst (
       .instr_i(instr),
 
       // Signals to the controller
@@ -463,17 +463,17 @@ matrix_cps_pkg::N_ROWS
 
     // From RF Sequencer and Execution Units
     dispatcher_rw_queue_full = rf_seq_rw_queue_full;
-    dispatcher_issue_queue_full[matrix_cps_pkg::FU_SYSTOLIC_ARRAY] = sa_ctrl_issue_queue_full;
-    dispatcher_issue_queue_full[matrix_cps_pkg::FU_LSU] = lsu_ctrl_issue_queue_full;
-    dispatcher_issue_queue_full[matrix_cps_pkg::FU_RF] = perm_busy;
+    dispatcher_issue_queue_full[quadrilatero_pkg::FU_SYSTOLIC_ARRAY] = sa_ctrl_issue_queue_full;
+    dispatcher_issue_queue_full[quadrilatero_pkg::FU_LSU] = lsu_ctrl_issue_queue_full;
+    dispatcher_issue_queue_full[quadrilatero_pkg::FU_RF] = perm_busy;
 
     // To input buffer
     in_buf_pop_ready = dispatcher_instr_ready && head_instr_committed;
   end
 
-  dispatcher #(
-      .N_REGS        (matrix_cps_pkg::N_REGS),
-      .NUM_EXEC_UNITS(matrix_cps_pkg::NUM_EXEC_UNITS)
+  quadrilatero_dispatcher #(
+      .N_REGS        (quadrilatero_pkg::N_REGS),
+      .NUM_EXEC_UNITS(quadrilatero_pkg::NUM_EXEC_UNITS)
   ) disp_inst (
       .clk_i,
       .rst_ni,
@@ -529,67 +529,67 @@ matrix_cps_pkg::N_ROWS
     rf_seq_rw_queue_push                                      = dispatcher_rw_queue_push;
 
     // Systolic Array: Weight Read Port
-    rf_seq_raddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W]    = sa_weight_raddr;
-    rf_seq_rrowaddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W] = sa_weight_rrowaddr;
-    rf_seq_rlast_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W]    = sa_weight_rlast;
-    rf_seq_rready_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W]   = sa_weight_rdata_ready;
-    rf_seq_rd_id_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W]    = sa_input_id;
+    rf_seq_raddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W]    = sa_weight_raddr;
+    rf_seq_rrowaddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W] = sa_weight_rrowaddr;
+    rf_seq_rlast_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W]    = sa_weight_rlast;
+    rf_seq_rready_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W]   = sa_weight_rdata_ready;
+    rf_seq_rd_id_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W]    = sa_input_id;
 
     // Systolic Array: Data Read Port
-    rf_seq_raddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D]    = sa_data_raddr;
-    rf_seq_rrowaddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D] = sa_data_rrowaddr;
-    rf_seq_rlast_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D]    = sa_data_rlast;
-    rf_seq_rready_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D]   = sa_data_rdata_ready;
-    rf_seq_rd_id_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D]    = sa_input_id;
+    rf_seq_raddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D]    = sa_data_raddr;
+    rf_seq_rrowaddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D] = sa_data_rrowaddr;
+    rf_seq_rlast_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D]    = sa_data_rlast;
+    rf_seq_rready_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D]   = sa_data_rdata_ready;
+    rf_seq_rd_id_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D]    = sa_input_id;
 
     // Systolic Array: Accumulator Read Port
-    rf_seq_raddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A]    = sa_acc_raddr;
-    rf_seq_rrowaddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A] = sa_acc_rrowaddr;
-    rf_seq_rlast_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A]    = sa_acc_rlast;
-    rf_seq_rready_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A]   = sa_data_rdata_ready;
-    rf_seq_rd_id_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A]    = sa_input_id;
+    rf_seq_raddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A]    = sa_acc_raddr;
+    rf_seq_rrowaddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A] = sa_acc_rrowaddr;
+    rf_seq_rlast_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A]    = sa_acc_rlast;
+    rf_seq_rready_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A]   = sa_data_rdata_ready;
+    rf_seq_rd_id_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A]    = sa_input_id;
 
     // LSU Read Port
-    rf_seq_raddr_from_fu[matrix_cps_pkg::LSU_R]               = lsu_raddr;
-    rf_seq_rrowaddr_from_fu[matrix_cps_pkg::LSU_R]            = lsu_rrowaddr;
-    rf_seq_rlast_from_fu[matrix_cps_pkg::LSU_R]               = lsu_rlast;
-    rf_seq_rready_from_fu[matrix_cps_pkg::LSU_R]              = lsu_rready;
-    rf_seq_rd_id_from_fu[matrix_cps_pkg::LSU_R]               = lsu_id;
+    rf_seq_raddr_from_fu[quadrilatero_pkg::LSU_R]               = lsu_raddr;
+    rf_seq_rrowaddr_from_fu[quadrilatero_pkg::LSU_R]            = lsu_rrowaddr;
+    rf_seq_rlast_from_fu[quadrilatero_pkg::LSU_R]               = lsu_rlast;
+    rf_seq_rready_from_fu[quadrilatero_pkg::LSU_R]              = lsu_rready;
+    rf_seq_rd_id_from_fu[quadrilatero_pkg::LSU_R]               = lsu_id;
 
 
     // Systolic Array: Accumulator Write Port
-    rf_seq_waddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY]      = sa_res_waddr;
-    rf_seq_wrowaddr_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY]   = sa_res_wrowaddr;
-    rf_seq_wdata_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY]      = sa_res_wdata;
-    rf_seq_we_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY]         = sa_res_we;
-    rf_seq_wlast_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY]      = sa_res_wlast;
-    rf_seq_wr_id_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY]      = sa_output_id;
+    rf_seq_waddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY]      = sa_res_waddr;
+    rf_seq_wrowaddr_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY]   = sa_res_wrowaddr;
+    rf_seq_wdata_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY]      = sa_res_wdata;
+    rf_seq_we_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY]         = sa_res_we;
+    rf_seq_wlast_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY]      = sa_res_wlast;
+    rf_seq_wr_id_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY]      = sa_output_id;
 
     // LSU Write Port
-    rf_seq_waddr_from_fu[matrix_cps_pkg::LSU_W]               = lsu_waddr;
-    rf_seq_wrowaddr_from_fu[matrix_cps_pkg::LSU_W]            = lsu_wrowaddr;
-    rf_seq_wdata_from_fu[matrix_cps_pkg::LSU_W]               = lsu_wdata;
-    rf_seq_we_from_fu[matrix_cps_pkg::LSU_W]                  = lsu_we;
-    rf_seq_wlast_from_fu[matrix_cps_pkg::LSU_W]               = lsu_wlast;
-    rf_seq_wr_id_from_fu[matrix_cps_pkg::LSU_W]               = lsu_id;
+    rf_seq_waddr_from_fu[quadrilatero_pkg::LSU_W]               = lsu_waddr;
+    rf_seq_wrowaddr_from_fu[quadrilatero_pkg::LSU_W]            = lsu_wrowaddr;
+    rf_seq_wdata_from_fu[quadrilatero_pkg::LSU_W]               = lsu_wdata;
+    rf_seq_we_from_fu[quadrilatero_pkg::LSU_W]                  = lsu_we;
+    rf_seq_wlast_from_fu[quadrilatero_pkg::LSU_W]               = lsu_wlast;
+    rf_seq_wr_id_from_fu[quadrilatero_pkg::LSU_W]               = lsu_id;
 
     // RF Exec Unit Write Port
-    rf_seq_waddr_from_fu[matrix_cps_pkg::RF_W]                = perm_unit_waddr;
-    rf_seq_wrowaddr_from_fu[matrix_cps_pkg::RF_W]             = perm_unit_wrowaddr;
-    rf_seq_wdata_from_fu[matrix_cps_pkg::RF_W]                = perm_unit_wdata;
-    rf_seq_we_from_fu[matrix_cps_pkg::RF_W]                   = perm_unit_we;
-    rf_seq_wlast_from_fu[matrix_cps_pkg::RF_W]                = perm_unit_wlast;
-    rf_seq_wr_id_from_fu[matrix_cps_pkg::RF_W]                = perm_unit_id;
+    rf_seq_waddr_from_fu[quadrilatero_pkg::RF_W]                = perm_unit_waddr;
+    rf_seq_wrowaddr_from_fu[quadrilatero_pkg::RF_W]             = perm_unit_wrowaddr;
+    rf_seq_wdata_from_fu[quadrilatero_pkg::RF_W]                = perm_unit_wdata;
+    rf_seq_we_from_fu[quadrilatero_pkg::RF_W]                   = perm_unit_we;
+    rf_seq_wlast_from_fu[quadrilatero_pkg::RF_W]                = perm_unit_wlast;
+    rf_seq_wr_id_from_fu[quadrilatero_pkg::RF_W]                = perm_unit_id;
   end
 
-  rf_sequencer #(
-      .READ_PORTS    (matrix_cps_pkg::READ_PORTS),
-      .WRITE_PORTS   (matrix_cps_pkg::WRITE_PORTS),
-      .N_REGS        (matrix_cps_pkg::N_REGS),
-      .N_ROWS        (matrix_cps_pkg::N_ROWS),
-      .RLEN          (matrix_cps_pkg::RLEN),
-      .RF_READ_PORTS (matrix_cps_pkg::RF_READ_PORTS),
-      .RF_WRITE_PORTS(matrix_cps_pkg::RF_WRITE_PORTS),
+  quadrilatero_rf_sequencer #(
+      .READ_PORTS    (quadrilatero_pkg::READ_PORTS),
+      .WRITE_PORTS   (quadrilatero_pkg::WRITE_PORTS),
+      .N_REGS        (quadrilatero_pkg::N_REGS),
+      .N_ROWS        (quadrilatero_pkg::N_ROWS),
+      .RLEN          (quadrilatero_pkg::RLEN),
+      .RF_READ_PORTS (quadrilatero_pkg::RF_READ_PORTS),
+      .RF_WRITE_PORTS(quadrilatero_pkg::RF_WRITE_PORTS),
       .N_ENTRIES     (2)
   ) rf_seq_inst (
 
@@ -632,11 +632,11 @@ matrix_cps_pkg::N_ROWS
       .rw_queue_full_o(rf_seq_rw_queue_full)
   );
 
-  matrix_cps_regfile #(
-      .READ_PORTS (matrix_cps_pkg::RF_READ_PORTS),
-      .WRITE_PORTS(matrix_cps_pkg::RF_WRITE_PORTS),
-      .N_REGS     (matrix_cps_pkg::N_REGS),
-      .RLEN       (matrix_cps_pkg::RLEN)
+  quadrilatero_regfile #(
+      .READ_PORTS (quadrilatero_pkg::RF_READ_PORTS),
+      .WRITE_PORTS(quadrilatero_pkg::RF_WRITE_PORTS),
+      .N_REGS     (quadrilatero_pkg::N_REGS),
+      .RLEN       (quadrilatero_pkg::RLEN)
   ) regfile_inst (
       .clk_i,
       .rst_ni,
@@ -659,7 +659,7 @@ matrix_cps_pkg::N_ROWS
   always_comb begin : sa_block
 
     // From Dispatcher
-    sa_ctrl_dispatch = dispatcher_dispatch[matrix_cps_pkg::FU_SYSTOLIC_ARRAY];
+    sa_ctrl_dispatch = dispatcher_dispatch[quadrilatero_pkg::FU_SYSTOLIC_ARRAY];
     sa_ctrl_dispatched_instr.data_reg = dispatcher_reg_ms1;
     sa_ctrl_dispatched_instr.weight_reg = dispatcher_reg_ms2;
     sa_ctrl_dispatched_instr.acc_reg = dispatcher_reg_ms3;
@@ -668,16 +668,16 @@ matrix_cps_pkg::N_ROWS
     sa_ctrl_dispatched_instr.sa_ctrl.is_float = dispatcher_is_float_out;
 
     // From Register File 
-    sa_data_rdata_valid = rf_seq_rvalid_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D];
-    sa_weight_rdata_valid = rf_seq_rvalid_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W];
-    sa_acc_rdata_valid = rf_seq_rvalid_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A];
-    sa_res_wready = rf_seq_wready_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY];
-    sa_data_rdata = rf_seq_rdata_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_D];
-    sa_weight_rdata = rf_seq_rdata_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_W];
-    sa_acc_rdata = rf_seq_rdata_from_fu[matrix_cps_pkg::SYSTOLIC_ARRAY_A];
+    sa_data_rdata_valid = rf_seq_rvalid_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D];
+    sa_weight_rdata_valid = rf_seq_rvalid_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W];
+    sa_acc_rdata_valid = rf_seq_rvalid_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A];
+    sa_res_wready = rf_seq_wready_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY];
+    sa_data_rdata = rf_seq_rdata_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_D];
+    sa_weight_rdata = rf_seq_rdata_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_W];
+    sa_acc_rdata = rf_seq_rdata_from_fu[quadrilatero_pkg::SYSTOLIC_ARRAY_A];
   end
 
-  systolic_array_controller #(
+  quadrilatero_systolic_array_controller #(
       .N_SLOTS   (2), //must be minum 2
       .DATA_WIDTH(32)
   ) sa_controller_inst (
@@ -694,7 +694,7 @@ matrix_cps_pkg::N_ROWS
       .issued_instr_o(sa_ctrl_issued_instr)  // issued instruction
   );
 
-  systolic_array #(
+  quadrilatero_systolic_array #(
       .MESH_WIDTH(MESH_WIDTH),
       .FPU       (FPU)
   ) sa_inst (
@@ -758,7 +758,7 @@ matrix_cps_pkg::N_ROWS
   always_comb begin : lsu_block
 
     // From Dispatcher
-    lsu_ctrl_dispatch = dispatcher_dispatch[matrix_cps_pkg::FU_LSU];
+    lsu_ctrl_dispatch = dispatcher_dispatch[quadrilatero_pkg::FU_LSU];
     lsu_ctrl_dispatched_instr.stride = dispatcher_rs_out[1];
     lsu_ctrl_dispatched_instr.addr = dispatcher_rs_out[0];
     lsu_ctrl_dispatched_instr.id = dispatcher_instr_id_out;  // instruction id
@@ -766,8 +766,8 @@ matrix_cps_pkg::N_ROWS
     lsu_ctrl_dispatched_instr.operand_reg = (dispatcher_is_store_out) ? dispatcher_reg_ms1: dispatcher_reg_md;  // destination register
 
     // FIX THIS : extract from CSR
-    lsu_ctrl_csr_config.n_col_bytes = matrix_cps_pkg::RLEN / 8;  // all bytes
-    lsu_ctrl_csr_config.n_rows = matrix_cps_pkg::MESH_WIDTH;  // hardcoded full matrix
+    lsu_ctrl_csr_config.n_col_bytes = quadrilatero_pkg::RLEN / 8;  // all bytes
+    lsu_ctrl_csr_config.n_rows = quadrilatero_pkg::MESH_WIDTH;  // hardcoded full matrix
 
     // OBI Interface signals
     lsu_data_gnt = mem_gnt_i;
@@ -780,12 +780,12 @@ matrix_cps_pkg::N_ROWS
     mem_wdata_o = lsu_data_wdata;
 
     // From Register File
-    lsu_wready = rf_seq_wready_from_fu[matrix_cps_pkg::LSU_W];
-    lsu_rvalid = rf_seq_rvalid_from_fu[matrix_cps_pkg::LSU_R];
-    lsu_rdata = rf_seq_rdata_from_fu[matrix_cps_pkg::LSU_R];
+    lsu_wready = rf_seq_wready_from_fu[quadrilatero_pkg::LSU_W];
+    lsu_rvalid = rf_seq_rvalid_from_fu[quadrilatero_pkg::LSU_R];
+    lsu_rdata = rf_seq_rdata_from_fu[quadrilatero_pkg::LSU_R];
   end
 
-  register_lsu_controller #(
+  quadrilatero_register_lsu_controller #(
       .N_SLOTS(2) //must be minum 2
   ) reg_loader_ctrl_inst (
       .clk_i,
@@ -803,10 +803,10 @@ matrix_cps_pkg::N_ROWS
       .issued_instr_conf_o(lsu_ctrl_issued_instr_conf)     // issued instruction configuration
   );
 
-  matrix_cps_register_lsu #(
-      .BUS_WIDTH(matrix_cps_pkg::BUS_WIDTH),
-      .N_REGS   (matrix_cps_pkg::N_REGS),
-      .N_ROWS   (matrix_cps_pkg::N_ROWS)
+  quadrilatero_register_lsu #(
+      .BUS_WIDTH(quadrilatero_pkg::BUS_WIDTH),
+      .N_REGS   (quadrilatero_pkg::N_REGS),
+      .N_ROWS   (quadrilatero_pkg::N_ROWS)
   ) regloader_i (
       .clk_i,
       .rst_ni,
@@ -867,17 +867,17 @@ matrix_cps_pkg::N_ROWS
     // From Dispatcher
     perm_unit_reg      = dispatcher_reg_md;
     perm_unit_instr_id = dispatcher_instr_id_out;
-    perm_start         = dispatcher_dispatch[matrix_cps_pkg::FU_RF];
+    perm_start         = dispatcher_dispatch[quadrilatero_pkg::FU_RF];
 
     // From Register File
-    perm_unit_wready   = rf_seq_wready_from_fu[matrix_cps_pkg::RF_W];
+    perm_unit_wready   = rf_seq_wready_from_fu[quadrilatero_pkg::RF_W];
   end
 
-  matrix_cps_perm_unit #(
+  quadrilatero_perm_unit #(
       .DEPTH (2), //must be minum 2
-      .RLEN  (matrix_cps_pkg::RLEN),
-      .N_REGS(matrix_cps_pkg::N_REGS),
-      .N_ROWS(matrix_cps_pkg::N_ROWS)
+      .RLEN  (quadrilatero_pkg::RLEN),
+      .N_REGS(quadrilatero_pkg::N_REGS),
+      .N_ROWS(quadrilatero_pkg::N_ROWS)
   ) perm_unit_i (
       .clk_i,
       .rst_ni,
@@ -910,30 +910,30 @@ matrix_cps_pkg::N_ROWS
 
   always_comb begin : finish_block
     // Finished Signal from Functional Units
-    x_res_finished[matrix_cps_pkg::FU_SYSTOLIC_ARRAY] = sa_finished;
-    x_res_finished[matrix_cps_pkg::FU_LSU] = lsu_finished;
-    x_res_finished[matrix_cps_pkg::FU_RF] = perm_unit_finished;
+    x_res_finished[quadrilatero_pkg::FU_SYSTOLIC_ARRAY] = sa_finished;
+    x_res_finished[quadrilatero_pkg::FU_LSU] = lsu_finished;
+    x_res_finished[quadrilatero_pkg::FU_RF] = perm_unit_finished;
 
     // Finished ID Signals from Functional Units
-    x_res_finished_id[matrix_cps_pkg::FU_SYSTOLIC_ARRAY] = sa_finished_instr_id;
-    x_res_finished_id[matrix_cps_pkg::FU_LSU] = lsu_finished_instr_id;
-    x_res_finished_id[matrix_cps_pkg::FU_RF] = perm_unit_finished_instr_id;
+    x_res_finished_id[quadrilatero_pkg::FU_SYSTOLIC_ARRAY] = sa_finished_instr_id;
+    x_res_finished_id[quadrilatero_pkg::FU_LSU] = lsu_finished_instr_id;
+    x_res_finished_id[quadrilatero_pkg::FU_RF] = perm_unit_finished_instr_id;
 
     // Finished Acknowledge Signals to Functional Units
-    sa_finished_ack = x_res_finished_ack[matrix_cps_pkg::FU_SYSTOLIC_ARRAY] & ~x_res_full;
-    lsu_finished_ack = x_res_finished_ack[matrix_cps_pkg::FU_LSU] & ~x_res_full;
-    perm_unit_finished_ack = x_res_finished_ack[matrix_cps_pkg::FU_RF] & ~x_res_full;
+    sa_finished_ack = x_res_finished_ack[quadrilatero_pkg::FU_SYSTOLIC_ARRAY] & ~x_res_full;
+    lsu_finished_ack = x_res_finished_ack[quadrilatero_pkg::FU_LSU] & ~x_res_full;
+    perm_unit_finished_ack = x_res_finished_ack[quadrilatero_pkg::FU_RF] & ~x_res_full;
   end
 
-  fixed_prio_arbiter #(
-      .PORTS(matrix_cps_pkg::NUM_EXEC_UNITS)
+  quadrilatero_fixed_prio_arbiter #(
+      .PORTS(quadrilatero_pkg::NUM_EXEC_UNITS)
   ) res_arb_inst (
       .req_i  (x_res_finished),
       .grant_o(x_res_finished_ack)
   );
 
   onehot_to_bin #(
-      .ONEHOT_WIDTH(matrix_cps_pkg::NUM_EXEC_UNITS)
+      .ONEHOT_WIDTH(quadrilatero_pkg::NUM_EXEC_UNITS)
   ) onehot2bin_res (
       .onehot(x_res_finished_ack),
       .bin   (x_res_selected_fu)
@@ -944,7 +944,7 @@ matrix_cps_pkg::N_ROWS
     x_res_data_in = x_res_finished_id[x_res_selected_fu];
     x_res_push = |x_res_finished_ack;
     x_res_almost_full = x_res_usage >
-        $clog2(RES_IF_FIFO_DEPTH)'(RES_IF_FIFO_DEPTH - matrix_cps_pkg::NUM_EXEC_UNITS);
+        $clog2(RES_IF_FIFO_DEPTH)'(RES_IF_FIFO_DEPTH - quadrilatero_pkg::NUM_EXEC_UNITS);
     x_res_pop = !x_res_empty && x_result_ready_i;
 
     // Result Interface Outputs

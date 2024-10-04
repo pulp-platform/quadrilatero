@@ -6,7 +6,7 @@
 // Author: Davide Schiavone
 
 // verilator lint_off UNUSED
-module rf_sequencer #(
+module quadrilatero_rf_sequencer #(
     parameter READ_PORTS     = 4,
     parameter WRITE_PORTS    = 2,
     parameter N_REGS         = 8,
@@ -41,7 +41,7 @@ module rf_sequencer #(
     input logic [WRITE_PORTS-1:0][xif_pkg::X_ID_WIDTH-1:0] wr_id_i,
 
     // Output to dispatcher to prevent WAW
-    output matrix_cps_pkg::rw_queue_t [N_REGS-1:0][N_ROWS-1:0] scoreboard_o,
+    output quadrilatero_pkg::rw_queue_t [N_REGS-1:0][N_ROWS-1:0] scoreboard_o,
 
     // Outputs to RF
     output logic [RF_READ_PORTS-1:0][$clog2(N_REGS)-1:0] raddr_o,
@@ -58,7 +58,7 @@ module rf_sequencer #(
     // Inputs from Dispatcher
     // We can share the entry as we fetch 1 instruction at a time
     // NOTE: Actually maybe it's better to have more ports so that we can push all operands and not waste cycles
-    input matrix_cps_pkg::rw_queue_t [N_REGS-1:0] rw_queue_entry_i,
+    input quadrilatero_pkg::rw_queue_t [N_REGS-1:0] rw_queue_entry_i,
     input logic                      [N_REGS-1:0] rw_queue_push_i,
 
     // Outputs to Dispatcher
@@ -79,10 +79,10 @@ module rf_sequencer #(
   logic                        [READ_PORTS -1:0]                                    rd_gnt;
 
   logic                        [     N_REGS-1:0]                                    rw_queue_push;
-  matrix_cps_pkg::rw_queue_t [                  N_REGS-1:0            ]             rw_queue_entry;
-  matrix_cps_pkg::rw_queue_t [                  N_REGS-1:0            ][N_ROWS-1:0] rw_queue;
-  matrix_cps_pkg::rw_queue_t [                  N_REGS-1:0            ][N_ROWS-1:0] scoreboard_d;
-  matrix_cps_pkg::rw_queue_t [                  N_REGS-1:0            ][N_ROWS-1:0] scoreboard_q;
+  quadrilatero_pkg::rw_queue_t [                  N_REGS-1:0            ]             rw_queue_entry;
+  quadrilatero_pkg::rw_queue_t [                  N_REGS-1:0            ][N_ROWS-1:0] rw_queue;
+  quadrilatero_pkg::rw_queue_t [                  N_REGS-1:0            ][N_ROWS-1:0] scoreboard_d;
+  quadrilatero_pkg::rw_queue_t [                  N_REGS-1:0            ][N_ROWS-1:0] scoreboard_q;
 
   genvar ii, hh;
 
@@ -100,7 +100,7 @@ module rf_sequencer #(
       fifo_v3 #(
           .FALL_THROUGH(1'b1),
           .DEPTH       (N_ENTRIES),
-          .dtype       (matrix_cps_pkg::rw_queue_t)
+          .dtype       (quadrilatero_pkg::rw_queue_t)
       ) issue_queue_inst (
           .clk_i,
           .rst_ni,
@@ -173,39 +173,39 @@ module rf_sequencer #(
       logic same_id_D;
       logic same_id_W;
 
-      same_id_acc = wr_id_i[matrix_cps_pkg::SYSTOLIC_ARRAY  ] == scoreboard_q[waddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY  ]][wrowaddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY  ]].id;
-      same_id_A   = rd_id_i[matrix_cps_pkg::SYSTOLIC_ARRAY_A] == scoreboard_q[raddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY_A]][rrowaddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY_A]].id;
-      same_id_D   = rd_id_i[matrix_cps_pkg::SYSTOLIC_ARRAY_D] == scoreboard_q[raddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY_D]][rrowaddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY_D]].id;
-      same_id_W   = rd_id_i[matrix_cps_pkg::SYSTOLIC_ARRAY_W] == scoreboard_q[raddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY_W]][rrowaddr_i[matrix_cps_pkg::SYSTOLIC_ARRAY_W]].id;
+      same_id_acc = wr_id_i[quadrilatero_pkg::SYSTOLIC_ARRAY  ] == scoreboard_q[waddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY  ]][wrowaddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY  ]].id;
+      same_id_A   = rd_id_i[quadrilatero_pkg::SYSTOLIC_ARRAY_A] == scoreboard_q[raddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY_A]][rrowaddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY_A]].id;
+      same_id_D   = rd_id_i[quadrilatero_pkg::SYSTOLIC_ARRAY_D] == scoreboard_q[raddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY_D]][rrowaddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY_D]].id;
+      same_id_W   = rd_id_i[quadrilatero_pkg::SYSTOLIC_ARRAY_W] == scoreboard_q[raddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY_W]][rrowaddr_i[quadrilatero_pkg::SYSTOLIC_ARRAY_W]].id;
 
-      if( (we_i    [matrix_cps_pkg::SYSTOLIC_ARRAY  ] && !same_id_acc) ||
-          (rready_i[matrix_cps_pkg::SYSTOLIC_ARRAY_A] && !same_id_A  ) ||
-          (rready_i[matrix_cps_pkg::SYSTOLIC_ARRAY_D] && !same_id_D  ) ||
-          (rready_i[matrix_cps_pkg::SYSTOLIC_ARRAY_W] && !same_id_W  )
+      if( (we_i    [quadrilatero_pkg::SYSTOLIC_ARRAY  ] && !same_id_acc) ||
+          (rready_i[quadrilatero_pkg::SYSTOLIC_ARRAY_A] && !same_id_A  ) ||
+          (rready_i[quadrilatero_pkg::SYSTOLIC_ARRAY_D] && !same_id_D  ) ||
+          (rready_i[quadrilatero_pkg::SYSTOLIC_ARRAY_W] && !same_id_W  )
         ) begin
         block = 1'b1;
       end else begin
         block = 1'b0;
       end
 
-      if (we_i[matrix_cps_pkg::SYSTOLIC_ARRAY] && same_id_acc && block) begin
-        wr_req[matrix_cps_pkg::SYSTOLIC_ARRAY] = 1'b0;
+      if (we_i[quadrilatero_pkg::SYSTOLIC_ARRAY] && same_id_acc && block) begin
+        wr_req[quadrilatero_pkg::SYSTOLIC_ARRAY] = 1'b0;
       end
-      if (rready_i[matrix_cps_pkg::SYSTOLIC_ARRAY_A] && same_id_A && block) begin
-        rd_req[matrix_cps_pkg::SYSTOLIC_ARRAY_A] = 1'b0;
+      if (rready_i[quadrilatero_pkg::SYSTOLIC_ARRAY_A] && same_id_A && block) begin
+        rd_req[quadrilatero_pkg::SYSTOLIC_ARRAY_A] = 1'b0;
       end
-      if (rready_i[matrix_cps_pkg::SYSTOLIC_ARRAY_D] && same_id_D && block) begin
-        rd_req[matrix_cps_pkg::SYSTOLIC_ARRAY_D] = 1'b0;
+      if (rready_i[quadrilatero_pkg::SYSTOLIC_ARRAY_D] && same_id_D && block) begin
+        rd_req[quadrilatero_pkg::SYSTOLIC_ARRAY_D] = 1'b0;
       end
-      if (rready_i[matrix_cps_pkg::SYSTOLIC_ARRAY_W] && same_id_W && block) begin
-        rd_req[matrix_cps_pkg::SYSTOLIC_ARRAY_W] = 1'b0;
+      if (rready_i[quadrilatero_pkg::SYSTOLIC_ARRAY_W] && same_id_W && block) begin
+        rd_req[quadrilatero_pkg::SYSTOLIC_ARRAY_W] = 1'b0;
       end
     end
   end
 
   if (RF_WRITE_PORTS != WRITE_PORTS) begin : write_block_wArb
 
-    rr_arbiter #(
+    quadrilatero_rr_arbiter #(
         .NumActOut(RF_WRITE_PORTS),
         .N_ROWS   (N_ROWS),
         .WIDTH    (WRITE_PORTS)
@@ -241,7 +241,7 @@ module rf_sequencer #(
 
   if (RF_READ_PORTS != READ_PORTS) begin : read_block_wArb
 
-    rr_arbiter #(
+    quadrilatero_rr_arbiter #(
         .NumActOut(RF_READ_PORTS),
         .N_ROWS   (N_ROWS),
         .WIDTH    (READ_PORTS)

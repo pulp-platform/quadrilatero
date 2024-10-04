@@ -1,3 +1,9 @@
+// Copyright 2024 EPFL
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+//
+// Author: Danilo Cammarata
+
 #ifndef MatrixMul32_H_
 #define MatrixMul32_H_
 

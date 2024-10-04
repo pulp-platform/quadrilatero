@@ -4,7 +4,7 @@
 //
 // Author: Saverio Nasturzio
 
-module MAC_int #(
+module quadrilatero_mac_int #(
     //parameter DATA_WIDTH = 32
     parameter ENABLE_SIMD = 1
 ) (
@@ -13,7 +13,7 @@ module MAC_int #(
     input logic [32-1:0] acc_i,
 
     // Only has effect if ENABLE_SIMD == 1
-    input matrix_cps_pkg::datatype_t op_datatype_i,  // whether 32,16,8 bit op
+    input quadrilatero_pkg::datatype_t op_datatype_i,  // whether 32,16,8 bit op
 
     output logic mac_finished_o,
     output logic [32-1:0] acc_o
@@ -33,18 +33,18 @@ module MAC_int #(
 
         case (op_datatype_i)
 
-          matrix_cps_pkg::SIZE_32: begin
+          quadrilatero_pkg::SIZE_32: begin
             data_x_weight = data_i * weight_i;
           end
 
-          matrix_cps_pkg::SIZE_16: begin
+          quadrilatero_pkg::SIZE_16: begin
             for (integer i = 0; i < 2; i++) begin
               data_x_weight += {{16{data_i  [i*16+15]}},data_i  [i*16+:16]} * 
                                {{16{weight_i[i*16+15]}},weight_i[i*16+:16]};
             end
           end
 
-          matrix_cps_pkg::SIZE_8: begin
+          quadrilatero_pkg::SIZE_8: begin
             for (integer i = 0; i < 4; i++) begin
               data_x_weight += {{24{data_i  [i*8+7]}},data_i  [i*8+:8]} * 
                                {{24{weight_i[i*8+7]}},weight_i[i*8+:8]};

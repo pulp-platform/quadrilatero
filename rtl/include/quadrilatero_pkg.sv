@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
 // Author: Saverio Nasturzio
-package matrix_cps_pkg;
+package quadrilatero_pkg;
 
   parameter int unsigned N_REGS = 8;
   parameter int unsigned DATA_WIDTH = 32;

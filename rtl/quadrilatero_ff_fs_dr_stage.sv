@@ -7,7 +7,7 @@
 /*
 NOTE: careful if you add arbiters to read port. You  must have dedicated ports for ACC and DATA as we wait for both to be valid at the same time!!
 */
-module ff_fs_dr_stage #(
+module quadrilatero_ff_fs_dr_stage #(
     parameter MESH_WIDTH = 4,
     parameter DATA_WIDTH = 32,
     parameter N_REGS = 8,
@@ -137,7 +137,7 @@ module ff_fs_dr_stage #(
   assign switch_db_o = (state == IDLE) && wl_valid_i;
 
 
-  skewer #(
+  quadrilatero_skewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) skewer_inst_data (
@@ -148,7 +148,7 @@ module ff_fs_dr_stage #(
       .data_o(data_mesh_skewed_o)
   );
 
-  skewer #(
+  quadrilatero_skewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) skewer_inst_acc (
@@ -159,7 +159,7 @@ module ff_fs_dr_stage #(
       .data_o(acc_mesh_skewed_o)
   );
 
-  deskewer #(
+  quadrilatero_deskewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) deskewer_inst_acc (

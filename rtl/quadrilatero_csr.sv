@@ -5,7 +5,7 @@
 // Author: Saverio Nasturzio
 
 // NOT FUNCTIONING / TESTED
-module matrix_cps_csr 
+module quadrilatero_csr 
 #(
 
   parameter RLEN = 4096, // length in bits for each register row

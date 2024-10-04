@@ -9,7 +9,7 @@ NOTE: for now we assume we fetch the entire row in 1 cycle. TODO: Change the num
 NOTE: we are not handling difference in endianness when loading reduced datawidths
 */
 
-module matrix_cps_register_lsu #(
+module quadrilatero_register_lsu #(
     parameter int unsigned BUS_WIDTH = 128,
     parameter int unsigned N_REGS = 8,
     parameter int unsigned N_ROWS = 4,
@@ -209,7 +209,7 @@ module matrix_cps_register_lsu #(
     end
   end
 
-  matrix_cps_lsu #(
+  quadrilatero_lsu #(
       .FIFO_DEPTH(4),
       .DATA_WIDTH(BUS_WIDTH)
   ) lsunit_inst (
@@ -274,7 +274,7 @@ module matrix_cps_register_lsu #(
   // Assertions
   if (N_ROWS < 2) begin
     $error(
-        "[matrix_cps_register_lsu] N_ROWS must be at least 2.\n"
+        "[quadrilatero_register_lsu] N_ROWS must be at least 2.\n"
     );
   end
 endmodule

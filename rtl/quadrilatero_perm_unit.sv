@@ -5,7 +5,7 @@
 // Author: Danilo Cammarata
 // Author: Davide Schiavone
 
-module matrix_cps_perm_unit #(
+module quadrilatero_perm_unit #(
     parameter int unsigned DEPTH  = 1,
     parameter int unsigned RLEN   = 128,
     parameter int unsigned N_REGS = 8,
@@ -160,7 +160,7 @@ module matrix_cps_perm_unit #(
   // Assertions
   if (N_ROWS < 2) begin
     $error(
-        "[matrix_cps_perm_unit] N_ROWS must be at least 2.\n"
+        "[quadrilatero_perm_unit] N_ROWS must be at least 2.\n"
     );
   end
 endmodule
