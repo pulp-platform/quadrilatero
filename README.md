@@ -7,4 +7,4 @@ It uses the CORE-V-X-IF interface to interface with the `OpenHW Group` CPUs and 
 
 An `LLVM` extended with the proposed instructions is available [here](https://github.com/epfl-systemf/rvm-compiler-project)
 
-The files are released under Apache License 2.0 (`Apache-2.0`), see `License`
+Unless specified otherwise in the respective file headers, all files into this repository are made available under Apache License 2.0 (`Apache-2.0`).
