@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
 // Author: Danilo Cammarata
+// Author: Davide Schiavone
 
 module matrix_cps_perm_unit #(
     parameter int unsigned DEPTH  = 1,
