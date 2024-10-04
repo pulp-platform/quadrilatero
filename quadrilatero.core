@@ -1,0 +1,52 @@
+CAPI=2:
+
+name: "x-heep:ip:quadrilatero"
+description: "ESL EPFL RVM-based matrix coprocessor"
+
+# Copyright 2024 EPFL
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_rtl:
+    depend:
+      - pulp-platform.org::common_cells
+      - pulp-platform.org::fpnew
+    files:
+    - rtl/include/cv32e40x_pkg.sv
+    - rtl/include/if_xif.sv
+    - rtl/include/obi_pkg.sv
+    - rtl/include/quadrilatero_instr_pkg.sv
+    - rtl/include/quadrilatero_pkg.sv
+    - rtl/include/xif_pkg.sv
+    - rtl/quadrilatero.sv
+    - rtl/quadrilatero_csr.sv
+    - rtl/quadrilatero_decoder.sv
+    - rtl/quadrilatero_deskewer.sv
+    - rtl/quadrilatero_dispatcher.sv
+    - rtl/quadrilatero_ff_fs_dr_stage.sv
+    - rtl/quadrilatero_fixed_prio_arbiter.sv
+    - rtl/quadrilatero_lsu.sv
+    - rtl/quadrilatero_mac_float.sv
+    - rtl/quadrilatero_mac_int.sv
+    - rtl/quadrilatero_mesh.sv
+    - rtl/quadrilatero_pe.sv
+    - rtl/quadrilatero_perm_unit.sv
+    - rtl/quadrilatero_regfile.sv
+    - rtl/quadrilatero_register_lsu.sv
+    - rtl/quadrilatero_register_lsu_controller.sv
+    - rtl/quadrilatero_rf_sequencer.sv
+    - rtl/quadrilatero_rr_arbiter.sv
+    - rtl/quadrilatero_skewer.sv
+    - rtl/quadrilatero_systolic_array.sv
+    - rtl/quadrilatero_systolic_array_controller.sv
+    - rtl/quadrilatero_to_obi.sv
+    - rtl/quadrilatero_wl_stage.sv
+    - rtl/quadrilatero_wrapper.sv
+    - rtl/quadrilatero_xif_decoder.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+    - files_rtl
