@@ -7,9 +7,9 @@
 
 // verilator lint_off UNUSED
 
-// Update the module to output a signal to let the controller know if a pump has occurred! In case the MAC unit stalls the pump, 
-// the controller might think it has indeed finished thus defeating the purpose of handling multi-cycle MAC operations.
-module PE #(
+// Update the module to output a signal to let the controller know if a pump has occurred! In case the mac unit stalls the pump, 
+// the controller might think it has indeed finished thus defeating the purpose of handling multi-cycle mac operations.
+module quadrilatero_pe #(
     parameter DATA_WIDTH = 32,
     parameter ENABLE_SIMD = 1,
     parameter FPU = 1
@@ -17,20 +17,20 @@ module PE #(
     input logic clk_i,
     input logic rst_ni,
 
-    input matrix_cps_pkg::sa_ctrl_t sa_ctrl_i,  // whether 32,16,8 bit op (only has effect if ENABLE_SIMD == 1)
+    input quadrilatero_pkg::sa_ctrl_t sa_ctrl_i,  // whether 32,16,8 bit op (only has effect if ENABLE_SIMD == 1)
     input logic pump_i,  // pump data out of the cell
 
     input  logic                     [DATA_WIDTH-1:0] acc_i,      // Accumulator from Top
     input  logic                     [DATA_WIDTH-1:0] data_i,     // Data from Left
     input  logic                     [DATA_WIDTH-1:0] weight_i,   // Weight
-    output matrix_cps_pkg::sa_ctrl_t                  sa_ctrl_o,
+    output quadrilatero_pkg::sa_ctrl_t                  sa_ctrl_o,
     output logic                     [DATA_WIDTH-1:0] data_o,     // Data to Right
     output logic                     [DATA_WIDTH-1:0] acc_o       // Accumulator to Bottom
 
 );
 
-  matrix_cps_pkg::sa_ctrl_t                  sa_ctrl_d;
-  matrix_cps_pkg::sa_ctrl_t                  sa_ctrl_q;
+  quadrilatero_pkg::sa_ctrl_t                  sa_ctrl_d;
+  quadrilatero_pkg::sa_ctrl_t                  sa_ctrl_q;
   logic                     [DATA_WIDTH-1:0] acc_d;
   logic                     [DATA_WIDTH-1:0] acc_q;
   logic                     [DATA_WIDTH-1:0] data_d;
@@ -54,7 +54,7 @@ module PE #(
 
   generate
     if (FPU) begin : gen_mac_float
-      MAC_float mac_float_inst (
+      quadrilatero_mac_float mac_float_inst (
           .clk_i,
           .rst_ni,
           .weight_i      (fp_weight),
@@ -70,7 +70,7 @@ module PE #(
 
   endgenerate
 
-  MAC_int #(
+  quadrilatero_mac_int #(
       .ENABLE_SIMD(ENABLE_SIMD)
   ) mac_int_inst (
       .weight_i      (int_weight),

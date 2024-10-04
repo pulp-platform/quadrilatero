@@ -4,7 +4,7 @@
 //
 // Author: Danilo Cammarata
 
-module rr_arbiter #(
+module quadrilatero_rr_arbiter #(
     parameter NumActOut = 3,
     parameter N_ROWS = 4   ,
     parameter WIDTH = 8

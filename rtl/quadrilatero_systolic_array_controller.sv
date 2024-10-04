@@ -5,7 +5,7 @@
 // Author: Saverio Nasturzio
 // Author: Davide Schiavone
 
-module systolic_array_controller #(
+module quadrilatero_systolic_array_controller #(
     parameter N_SLOTS = 3,
     parameter DATA_WIDTH = 32
 ) (
@@ -14,12 +14,12 @@ module systolic_array_controller #(
 
     output logic issue_queue_full_o,
     input logic dispatch_i,
-    input matrix_cps_pkg::sa_instr_t dispatched_instr_i,
+    input quadrilatero_pkg::sa_instr_t dispatched_instr_i,
 
     // To Systolic Array
     input logic wl_ready_i,  // WL stage is ready for new instruction
     output logic start_o,  // WL will start executing new instruction
-    output matrix_cps_pkg::sa_instr_t issued_instr_o  // issued instruction
+    output quadrilatero_pkg::sa_instr_t issued_instr_o  // issued instruction
 );
 
   localparam int unsigned USAGE_DEPTH = (N_SLOTS > 1) ? $clog2(N_SLOTS) : 1;
@@ -41,7 +41,7 @@ module systolic_array_controller #(
       .FALL_THROUGH(0),
       .DATA_WIDTH  (DATA_WIDTH),
       .DEPTH       (N_SLOTS),
-      .dtype       (matrix_cps_pkg::sa_instr_t)
+      .dtype       (quadrilatero_pkg::sa_instr_t)
   ) issue_queue_inst (
       .clk_i,
       .rst_ni,

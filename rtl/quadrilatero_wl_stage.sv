@@ -4,7 +4,7 @@
 //
 // Author: Danilo Cammarata
 
-module wl_stage #(
+module quadrilatero_wl_stage #(
     parameter MESH_WIDTH = 4,
     parameter DATA_WIDTH = 32
 ) (

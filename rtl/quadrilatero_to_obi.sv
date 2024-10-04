@@ -11,8 +11,8 @@
  *  This module is currently working only for BUS_WIDTH = 128.
  *  For a different BUS_WIDTH value, modify it accordingly where marked.
  */
-module matrix_cps_to_obi
-  import matrix_cps_pkg::*;
+module quadrilatero_to_obi
+  import quadrilatero_pkg::*;
   import xif_pkg::*;
   import obi_pkg::*;
 (
@@ -23,27 +23,27 @@ module matrix_cps_to_obi
     // Memory Interface to x-heep OBI
     input logic                                     mem_req_i,
     input logic                                     mem_we_i,
-    input logic [matrix_cps_pkg::BUS_WIDTH/8 - 1:0] mem_be_i,
+    input logic [quadrilatero_pkg::BUS_WIDTH/8 - 1:0] mem_be_i,
     input logic [                             31:0] mem_addr_i,
-    input logic [  matrix_cps_pkg::BUS_WIDTH - 1:0] mem_wdata_i,
+    input logic [  quadrilatero_pkg::BUS_WIDTH - 1:0] mem_wdata_i,
 
     output logic                                   mem_gnt_o,
     output logic                                   mem_rvalid_o,
-    output logic [matrix_cps_pkg::BUS_WIDTH - 1:0] mem_rdata_o,
+    output logic [quadrilatero_pkg::BUS_WIDTH - 1:0] mem_rdata_o,
 
     // OBI signals  -- MODIFY IF BUS_WIDTH != 128 
-    output obi_req_t  matrix_cps_ch0_req_o,
-    input  obi_resp_t matrix_cps_ch0_resp_i,
-    output obi_req_t  matrix_cps_ch1_req_o,
-    input  obi_resp_t matrix_cps_ch1_resp_i,
-    output obi_req_t  matrix_cps_ch2_req_o,
-    input  obi_resp_t matrix_cps_ch2_resp_i,
-    output obi_req_t  matrix_cps_ch3_req_o,
-    input  obi_resp_t matrix_cps_ch3_resp_i
+    output obi_req_t  quadrilatero_ch0_req_o,
+    input  obi_resp_t quadrilatero_ch0_resp_i,
+    output obi_req_t  quadrilatero_ch1_req_o,
+    input  obi_resp_t quadrilatero_ch1_resp_i,
+    output obi_req_t  quadrilatero_ch2_req_o,
+    input  obi_resp_t quadrilatero_ch2_resp_i,
+    output obi_req_t  quadrilatero_ch3_req_o,
+    input  obi_resp_t quadrilatero_ch3_resp_i
 );
 
   // Internal signals and parameters
-  localparam int N_PLL_PORTS = matrix_cps_pkg::BUS_WIDTH / 32;
+  localparam int N_PLL_PORTS = quadrilatero_pkg::BUS_WIDTH / 32;
 
   obi_req_t                                    matrix_req [0:N_PLL_PORTS-1];
   obi_resp_t                                   matrix_rsp [0:N_PLL_PORTS-1];
@@ -52,11 +52,11 @@ module matrix_cps_to_obi
   logic      [              N_PLL_PORTS-1 : 0] gnt_d;
   logic      [              N_PLL_PORTS-1 : 0] rvalid_q;
   logic      [              N_PLL_PORTS-1 : 0] rvalid_d;
-  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata_q;
-  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata_d;
+  logic      [quadrilatero_pkg::BUS_WIDTH - 1:0] rdata_q;
+  logic      [quadrilatero_pkg::BUS_WIDTH - 1:0] rdata_d;
   logic      [              N_PLL_PORTS-1 : 0] gnt;
   logic      [              N_PLL_PORTS-1 : 0] rvalid;
-  logic      [matrix_cps_pkg::BUS_WIDTH - 1:0] rdata;
+  logic      [quadrilatero_pkg::BUS_WIDTH - 1:0] rdata;
   logic                                        all_gnt;
   logic                                        all_rvalid;
 
@@ -125,16 +125,16 @@ module matrix_cps_to_obi
   end
 
   // Input re-assignment  -- MODIFY IF BUS_WIDTH != 128
-  assign matrix_rsp[0]        = matrix_cps_ch0_resp_i;
-  assign matrix_rsp[1]        = matrix_cps_ch1_resp_i;
-  assign matrix_rsp[2]        = matrix_cps_ch2_resp_i;
-  assign matrix_rsp[3]        = matrix_cps_ch3_resp_i;
+  assign matrix_rsp[0]        = quadrilatero_ch0_resp_i;
+  assign matrix_rsp[1]        = quadrilatero_ch1_resp_i;
+  assign matrix_rsp[2]        = quadrilatero_ch2_resp_i;
+  assign matrix_rsp[3]        = quadrilatero_ch3_resp_i;
 
   // Output re-assignment  -- MODIFY IF BUS_WIDTH != 128
-  assign matrix_cps_ch0_req_o = matrix_req[0];
-  assign matrix_cps_ch1_req_o = matrix_req[1];
-  assign matrix_cps_ch2_req_o = matrix_req[2];
-  assign matrix_cps_ch3_req_o = matrix_req[3];
+  assign quadrilatero_ch0_req_o = matrix_req[0];
+  assign quadrilatero_ch1_req_o = matrix_req[1];
+  assign quadrilatero_ch2_req_o = matrix_req[2];
+  assign quadrilatero_ch3_req_o = matrix_req[3];
 
   assign mem_gnt_o            = all_gnt;
   assign mem_rvalid_o         = all_rvalid;
@@ -142,15 +142,15 @@ module matrix_cps_to_obi
 
 
   // Assertions -- MODIFY IF BUS_WIDTH != 128
-  if (matrix_cps_pkg::BUS_WIDTH != 128) begin
+  if (quadrilatero_pkg::BUS_WIDTH != 128) begin
     $error(
-        "[matrix_cps_to_obi] The matrix_cps_pkg::BUS_WIDTH needs to be 128 for the current implementation.\n"
+        "[quadrilatero_to_obi] The quadrilatero_pkg::BUS_WIDTH needs to be 128 for the current implementation.\n"
     );
   end
 
-  if (matrix_cps_pkg::BUS_WIDTH != ((matrix_cps_pkg::BUS_WIDTH >> 5) << 5)) begin
+  if (quadrilatero_pkg::BUS_WIDTH != ((quadrilatero_pkg::BUS_WIDTH >> 5) << 5)) begin
     $error(
-        "[matrix_cps_to_obi] The matrix_cps_pkg::BUS_WIDTH needs to be a multiple of 32.\n"
+        "[quadrilatero_to_obi] The quadrilatero_pkg::BUS_WIDTH needs to be a multiple of 32.\n"
     );
   end
 

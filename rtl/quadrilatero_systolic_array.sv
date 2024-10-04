@@ -12,7 +12,7 @@ TODO:
     - basically you need to inject zeros instead of actual elements
 */
 
-module systolic_array #(
+module quadrilatero_systolic_array #(
     parameter  int MESH_WIDTH  = 4,
     parameter  int DATA_WIDTH  = 32,
     parameter  int N_REGS      = 8,
@@ -28,7 +28,7 @@ module systolic_array #(
     input  logic start_i,
 
     // Only has effect if ENABLE_SIMD == 1
-    input matrix_cps_pkg::sa_ctrl_t sa_ctrl_i,
+    input quadrilatero_pkg::sa_ctrl_t sa_ctrl_i,
 
     input logic [     $clog2(N_REGS)-1:0] data_reg_i,    // data register
     input logic [     $clog2(N_REGS)-1:0] acc_reg_i,     // accumulator register
@@ -108,8 +108,8 @@ module systolic_array #(
   logic [$clog2(N_REGS)-1:0] acc_reg_q;  // Accumulator register -- FF Stage
   logic [$clog2(N_REGS)-1:0] weight_reg_q;  // Weight register
   logic [$clog2(N_REGS)-1:0] weight_reg_d;  // Weight register
-  matrix_cps_pkg::sa_ctrl_t sa_ctrl_d;
-  matrix_cps_pkg::sa_ctrl_t sa_ctrl_q;
+  quadrilatero_pkg::sa_ctrl_t sa_ctrl_d;
+  quadrilatero_pkg::sa_ctrl_t sa_ctrl_q;
 
   logic [$clog2(N_REGS)-1:0] acc_fs_q;  // Accumulator register -- FS Stage
   logic [$clog2(N_REGS)-1:0] acc_fs_d;  // Accumulator register -- FS Stage
@@ -129,7 +129,7 @@ module systolic_array #(
   logic [xif_pkg::X_ID_WIDTH-1:0] finished_instr_id_q;
   logic mask_req;
 
-  matrix_cps_pkg::sa_ctrl_t [MESH_WIDTH-1:0] sa_ctrl_mesh_skewed;
+  quadrilatero_pkg::sa_ctrl_t [MESH_WIDTH-1:0] sa_ctrl_mesh_skewed;
 
   logic [MESH_WIDTH-1:0][DATA_WIDTH-1:0] data_mesh_skewed;
   logic [MESH_WIDTH-1:0][DATA_WIDTH-1:0] acc_mesh_skewed;
@@ -233,7 +233,7 @@ module systolic_array #(
     mask_req = (dr_counter_q == $clog2(MESH_WIDTH)'(MESH_WIDTH - 1)) & finished_q & ~finished_ack_i;
   end
 
-  skewer #(
+  quadrilatero_skewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) skewer_inst_data (
@@ -244,7 +244,7 @@ module systolic_array #(
       .data_o(data_mesh_skewed)
   );
 
-  skewer #(
+  quadrilatero_skewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) skewer_inst_acc (
@@ -255,7 +255,7 @@ module systolic_array #(
       .data_o(acc_mesh_skewed)
   );
 
-  skewer #(
+  quadrilatero_skewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(4)
   ) skewer_inst_ctrl (
@@ -266,7 +266,7 @@ module systolic_array #(
       .data_o(sa_ctrl_mesh_skewed)
   );
 
-  wl_stage #(
+  quadrilatero_wl_stage #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) weight_inst (
@@ -283,7 +283,7 @@ module systolic_array #(
       .weight_rdata_o(weight_mesh_skewed)
   );
 
-  mesh #(
+  quadrilatero_mesh #(
       .MESH_WIDTH (MESH_WIDTH),
       .ENABLE_SIMD(ENABLE_SIMD),
       .FPU        (FPU)
@@ -300,7 +300,7 @@ module systolic_array #(
       .acc_o   (res_mesh_skewed)
   );
 
-  deskewer #(
+  quadrilatero_deskewer #(
       .MESH_WIDTH(MESH_WIDTH),
       .DATA_WIDTH(DATA_WIDTH)
   ) deskewer_inst_acc (

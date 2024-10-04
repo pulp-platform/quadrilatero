@@ -21,7 +21,7 @@
 // mcfg              31..27=0b11111 26..25=0b11 24..20=0b00000 rs1 14..12=0b000 rd 6..0=0b0101011 
 
 
-package matrix_cps_instr_pkg;
+package quadrilatero_instr_pkg;
 
   localparam [31:0] FMMACC_D = 32'b00010000?????????000110000101011;
   localparam [31:0] FMMACC_H = 32'b00010000?????????000010000101011;

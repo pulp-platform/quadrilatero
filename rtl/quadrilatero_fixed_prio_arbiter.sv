@@ -4,7 +4,7 @@
 //
 // Author: Saverio Nasturzio
 
-module fixed_prio_arbiter #(
+module quadrilatero_fixed_prio_arbiter #(
     parameter PORTS = 4
 ) (
     input  logic [PORTS-1:0] req_i,

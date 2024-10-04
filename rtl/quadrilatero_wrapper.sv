@@ -8,8 +8,8 @@
 
 
 
-module matrix_cps_wrapper
-  import matrix_cps_pkg::*;
+module quadrilatero_wrapper
+  import quadrilatero_pkg::*;
   import xif_pkg::*;
   import obi_pkg::*;
 #(
@@ -30,29 +30,29 @@ module matrix_cps_wrapper
     if_xif.coproc_result     xif_result_if,
 
     // OBI signals 
-    output obi_req_t  matrix_cps_ch0_req_o,
-    input  obi_resp_t matrix_cps_ch0_resp_i,
-    output obi_req_t  matrix_cps_ch1_req_o,
-    input  obi_resp_t matrix_cps_ch1_resp_i,
-    output obi_req_t  matrix_cps_ch2_req_o,
-    input  obi_resp_t matrix_cps_ch2_resp_i,
-    output obi_req_t  matrix_cps_ch3_req_o,
-    input  obi_resp_t matrix_cps_ch3_resp_i
+    output obi_req_t  quadrilatero_ch0_req_o,
+    input  obi_resp_t quadrilatero_ch0_resp_i,
+    output obi_req_t  quadrilatero_ch1_req_o,
+    input  obi_resp_t quadrilatero_ch1_resp_i,
+    output obi_req_t  quadrilatero_ch2_req_o,
+    input  obi_resp_t quadrilatero_ch2_resp_i,
+    output obi_req_t  quadrilatero_ch3_req_o,
+    input  obi_resp_t quadrilatero_ch3_resp_i
 );
 
   // Internal signals
   logic                                     mem_req;
   logic                                     mem_we;
-  logic [matrix_cps_pkg::BUS_WIDTH/8 - 1:0] mem_be;
+  logic [quadrilatero_pkg::BUS_WIDTH/8 - 1:0] mem_be;
   logic [                             31:0] mem_addr;
-  logic [  matrix_cps_pkg::BUS_WIDTH - 1:0] mem_wdata;
+  logic [  quadrilatero_pkg::BUS_WIDTH - 1:0] mem_wdata;
   logic                                     mem_gnt;
   logic                                     mem_rvalid;
-  logic [  matrix_cps_pkg::BUS_WIDTH - 1:0] mem_rdata;
+  logic [  quadrilatero_pkg::BUS_WIDTH - 1:0] mem_rdata;
 
 
   // Matrix coprocessor
-  matrix_cps #(
+  quadrilatero #(
       .INPUT_BUFFER_DEPTH(INPUT_BUFFER_DEPTH),  // 0 means no input buffer 
       .RES_IF_FIFO_DEPTH (RES_IF_FIFO_DEPTH),
       .FPU               (MATRIX_FPU)
@@ -104,7 +104,7 @@ module matrix_cps_wrapper
 
 
   // Bridge to OBI
-  matrix_cps_to_obi bridge_inst (
+  quadrilatero_to_obi bridge_inst (
       // Clock and Reset
       .clk_i,
       .rst_ni,
@@ -121,14 +121,14 @@ module matrix_cps_wrapper
       .mem_rdata_o (mem_rdata),
 
       // OBI signals 
-      .matrix_cps_ch0_req_o,
-      .matrix_cps_ch0_resp_i,
-      .matrix_cps_ch1_req_o,
-      .matrix_cps_ch1_resp_i,
-      .matrix_cps_ch2_req_o,
-      .matrix_cps_ch2_resp_i,
-      .matrix_cps_ch3_req_o,
-      .matrix_cps_ch3_resp_i
+      .quadrilatero_ch0_req_o,
+      .quadrilatero_ch0_resp_i,
+      .quadrilatero_ch1_req_o,
+      .quadrilatero_ch1_resp_i,
+      .quadrilatero_ch2_req_o,
+      .quadrilatero_ch2_resp_i,
+      .quadrilatero_ch3_req_o,
+      .quadrilatero_ch3_resp_i
   );
 
 endmodule

@@ -5,7 +5,7 @@
 // Author: Danilo Cammarata
 // Author: Davide Schiavone
 
-module matrix_cps_lsu #(
+module quadrilatero_lsu #(
     parameter int unsigned FIFO_DEPTH = 4,
     parameter int unsigned DATA_WIDTH = 32
 

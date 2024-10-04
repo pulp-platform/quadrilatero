@@ -5,7 +5,7 @@
 // Author: Danilo Cammarata
 
 // verilator lint_off UNUSED
-module MAC_float (
+module quadrilatero_mac_float (
     input logic        clk_i,
     input logic        rst_ni,
     input logic [31:0] data_i,

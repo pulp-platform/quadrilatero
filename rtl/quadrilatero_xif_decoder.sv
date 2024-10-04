@@ -8,7 +8,7 @@
 // Actual decoding of the instruction is delegated to cps_decoder
 
 
-module matrix_cps_xif_decoder #(
+module quadrilatero_xif_decoder #(
 ) (
     input  logic                   [31:0] instr_i,
     output xif_pkg::x_issue_resp_t        x_issue_resp_o
@@ -84,20 +84,20 @@ module matrix_cps_xif_decoder #(
 
   always_comb begin : decoder_block
     unique casez (instr_i)
-      matrix_cps_instr_pkg::FMMACC_S: x_issue_resp_o = instr_fmmacc_s;
-      matrix_cps_instr_pkg::FMMACC_D: x_issue_resp_o = instr_fmmacc_d;
-      matrix_cps_instr_pkg::FMMACC_H: x_issue_resp_o = instr_fmmacc_h;
-      matrix_cps_instr_pkg::MMAQA_B:  x_issue_resp_o = instr_mmaqa_b;
-      matrix_cps_instr_pkg::MMADA_H:  x_issue_resp_o = instr_mmada_h;
-      matrix_cps_instr_pkg::MMASA_W:  x_issue_resp_o = instr_mmasa_w;
-      matrix_cps_instr_pkg::MLD_B:    x_issue_resp_o = instr_mld_b;
-      matrix_cps_instr_pkg::MLD_H:    x_issue_resp_o = instr_mld_h;
-      matrix_cps_instr_pkg::MLD_W:    x_issue_resp_o = instr_mld_w;
-      matrix_cps_instr_pkg::MST_B:    x_issue_resp_o = instr_mst_b;
-      matrix_cps_instr_pkg::MST_H:    x_issue_resp_o = instr_mst_h;
-      matrix_cps_instr_pkg::MST_W:    x_issue_resp_o = instr_mst_w;
-      matrix_cps_instr_pkg::MZERO:    x_issue_resp_o = instr_mzero;
-      default:                        x_issue_resp_o = '0;
+      quadrilatero_instr_pkg::FMMACC_S: x_issue_resp_o = instr_fmmacc_s;
+      quadrilatero_instr_pkg::FMMACC_D: x_issue_resp_o = instr_fmmacc_d;
+      quadrilatero_instr_pkg::FMMACC_H: x_issue_resp_o = instr_fmmacc_h;
+      quadrilatero_instr_pkg::MMAQA_B:  x_issue_resp_o = instr_mmaqa_b;
+      quadrilatero_instr_pkg::MMADA_H:  x_issue_resp_o = instr_mmada_h;
+      quadrilatero_instr_pkg::MMASA_W:  x_issue_resp_o = instr_mmasa_w;
+      quadrilatero_instr_pkg::MLD_B:    x_issue_resp_o = instr_mld_b;
+      quadrilatero_instr_pkg::MLD_H:    x_issue_resp_o = instr_mld_h;
+      quadrilatero_instr_pkg::MLD_W:    x_issue_resp_o = instr_mld_w;
+      quadrilatero_instr_pkg::MST_B:    x_issue_resp_o = instr_mst_b;
+      quadrilatero_instr_pkg::MST_H:    x_issue_resp_o = instr_mst_h;
+      quadrilatero_instr_pkg::MST_W:    x_issue_resp_o = instr_mst_w;
+      quadrilatero_instr_pkg::MZERO:    x_issue_resp_o = instr_mzero;
+      default:                          x_issue_resp_o = '0;
     endcase
   end
 

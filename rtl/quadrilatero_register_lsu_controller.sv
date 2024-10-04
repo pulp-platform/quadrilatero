@@ -5,7 +5,7 @@
 // Author: Saverio Nasturzio
 // Author: Davide Schiavone
 
-module register_lsu_controller #(
+module quadrilatero_register_lsu_controller #(
     parameter N_SLOTS = 3
 ) (
     input logic clk_i,
@@ -13,14 +13,14 @@ module register_lsu_controller #(
 
     output logic issue_queue_full_o,
     input logic dispatch_i,
-    input matrix_cps_pkg::lsu_instr_t dispatched_instr_i,
-    input matrix_cps_pkg::lsu_conf_t csr_config_i,  // csr matrix configuration 
+    input quadrilatero_pkg::lsu_instr_t dispatched_instr_i,
+    input quadrilatero_pkg::lsu_conf_t csr_config_i,  // csr matrix configuration 
 
     // To Register Loader
     input logic busy_i,  // Load Unit busy
     output logic start_o,  // WL will start executing new instruction
-    output matrix_cps_pkg::lsu_instr_t issued_instr_o,  // issued instruction
-    output matrix_cps_pkg::lsu_conf_t issued_instr_conf_o  // issued instruction configuration
+    output quadrilatero_pkg::lsu_instr_t issued_instr_o,  // issued instruction
+    output quadrilatero_pkg::lsu_conf_t issued_instr_conf_o  // issued instruction configuration
 );
 
   localparam int unsigned USAGE_DEPTH = (N_SLOTS > 1) ? $clog2(N_SLOTS) : 1;
@@ -36,9 +36,9 @@ module register_lsu_controller #(
   assign issue_queue_almost_full = issue_queue_inst_usage == (N_SLOTS[USAGE_DEPTH:0] - 1);
   assign issue_queue_full_o = issue_queue_almost_full | issue_queue_full;
 
-  matrix_cps_pkg::lsu_instr_t issued_instr_ff;  // issued instruction
-  matrix_cps_pkg::lsu_instr_t fifo_data_out;
-  matrix_cps_pkg::lsu_conf_t  issued_instr_conf_ff;  // issued instruction configuration
+  quadrilatero_pkg::lsu_instr_t issued_instr_ff;  // issued instruction
+  quadrilatero_pkg::lsu_instr_t fifo_data_out;
+  quadrilatero_pkg::lsu_conf_t  issued_instr_conf_ff;  // issued instruction configuration
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
@@ -68,7 +68,7 @@ module register_lsu_controller #(
       .FALL_THROUGH(0),
       .DATA_WIDTH  (32),
       .DEPTH       (N_SLOTS),
-      .dtype       (matrix_cps_pkg::lsu_instr_t)
+      .dtype       (quadrilatero_pkg::lsu_instr_t)
   ) issue_queue_inst (
       .clk_i,
       .rst_ni,

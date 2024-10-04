@@ -5,7 +5,7 @@
 // Author: Danilo Cammarata
 // Author: Davide Schiavone
 
-module dispatcher #(
+module quadrilatero_dispatcher #(
     parameter N_REGS = 8,
     parameter NUM_EXEC_UNITS = 3
 ) (
@@ -16,7 +16,7 @@ module dispatcher #(
     // We can share the entry as we fetch 1 instruction at a time
     // NOTE: Actually maybe it's better to have more ports so that we can push all operands and not waste cycles
     // NOTE: probably the 'lost'cycles are not lost because we can directly push the instruction to the queue even while pushing the operands and they can start execution and if needed stall since no entry in the rw_queue will be found
-    output matrix_cps_pkg::rw_queue_t [N_REGS-1:0] rw_queue_entry_o,
+    output quadrilatero_pkg::rw_queue_t [N_REGS-1:0] rw_queue_entry_o,
     output logic [N_REGS-1:0] rw_queue_push_o,
 
     // Inputs from RF Sequencer
@@ -27,20 +27,20 @@ module dispatcher #(
     input logic [xif_pkg::X_ID_WIDTH-1:0] instr_id_i,  // id of the instruction
     input logic [xif_pkg::X_NUM_RS  -1:0][xif_pkg::X_RFR_WIDTH-1:0] rs_i,        // Register file source operands for the offloaded instruction
     input logic [xif_pkg::X_NUM_RS  -1:0]                  rs_valid_i,  // Validity of the register file source operand(s)
-    input matrix_cps_pkg::datatype_t datatype_i,
+    input quadrilatero_pkg::datatype_t datatype_i,
 
 
     input logic [$clog2(
-matrix_cps_pkg::MAX_NUM_READ_OPERANDS
+quadrilatero_pkg::MAX_NUM_READ_OPERANDS
 )-1:0] n_matrix_operands_read_i,  // how many reads to RF
 
     // IMPORTANT: Make sure the order of pushing does not impact or deadlock
-    input logic [matrix_cps_pkg::MAX_NUM_READ_OPERANDS-1:0][$clog2(
+    input logic [quadrilatero_pkg::MAX_NUM_READ_OPERANDS-1:0][$clog2(
 N_REGS
 )-1:0] rf_read_regs_i,  // which registers to read from 
     input logic rf_writeback_i,  // whether we need to write to the register file
     input logic [$clog2(N_REGS)-1:0] rf_writeback_reg_i,  // which register to writeback to 
-    input matrix_cps_pkg::execution_units_t exec_unit_i,  // which exec unit
+    input quadrilatero_pkg::execution_units_t exec_unit_i,  // which exec unit
     input logic is_store_i,  // store to memory operation
     input logic is_float_i,  // float to arithmetic operation
 
@@ -48,7 +48,7 @@ N_REGS
     output logic [xif_pkg::X_ID_WIDTH-1:0] instr_id_o,  // id of the instruction out
     output logic [xif_pkg::X_NUM_RS  -1:0][xif_pkg::X_RFR_WIDTH-1:0] rs_o,        // Register file source operands for the offloaded instruction
     output logic [xif_pkg::X_NUM_RS  -1:0]                  rs_valid_o,  // Validity of the register file source operand(s)
-    output matrix_cps_pkg::datatype_t datatype_o,
+    output quadrilatero_pkg::datatype_t datatype_o,
     output logic is_store_o,
     output logic is_float_o,
 
@@ -61,7 +61,7 @@ N_REGS
     // Backpressure towards Decoder
     output logic instr_ready_o,
     // From RF Sequencer to prevent WAW
-    input matrix_cps_pkg::rw_queue_t [N_REGS-1:0][matrix_cps_pkg::N_ROWS-1:0] scoreboard_i,
+    input quadrilatero_pkg::rw_queue_t [N_REGS-1:0][quadrilatero_pkg::N_ROWS-1:0] scoreboard_i,
 
     // Outputs towards Execution Units
     input  logic [NUM_EXEC_UNITS-1:0] issue_queue_full_i,
@@ -87,13 +87,13 @@ N_REGS
   logic [xif_pkg::X_ID_WIDTH-1:0] instr_id_d;  // id of the instruction out
   logic [xif_pkg::X_NUM_RS  -1:0][xif_pkg::X_RFR_WIDTH-1:0] rs_d      ;  // Register file source operands for the offloaded instruction
   logic [xif_pkg::X_NUM_RS  -1:0] rs_valid_d;  // Validity of the register file source operand(s)
-  matrix_cps_pkg::datatype_t datatype_d;
+  quadrilatero_pkg::datatype_t datatype_d;
   logic is_store_d;
   logic is_float_d;
   logic [xif_pkg::X_ID_WIDTH-1:0] instr_id_q;  // id of the instruction out
   logic [xif_pkg::X_NUM_RS  -1:0][xif_pkg::X_RFR_WIDTH-1:0] rs_q      ;  // Register file source operands for the offloaded instruction
   logic [xif_pkg::X_NUM_RS  -1:0] rs_valid_q;  // Validity of the register file source operand(s)
-  matrix_cps_pkg::datatype_t datatype_q;
+  quadrilatero_pkg::datatype_t datatype_q;
   logic is_store_q;
   logic is_float_q;
 
@@ -153,7 +153,7 @@ N_REGS
 
   always_comb begin
     waw_inflight = wready[rf_writeback_reg_i];
-    for (int i = 0; i < matrix_cps_pkg::N_ROWS; i = i + 1) begin
+    for (int i = 0; i < quadrilatero_pkg::N_ROWS; i = i + 1) begin
       waw_inflight |= scoreboard_i[rf_writeback_reg_i][i].wready;
     end
   end
@@ -281,7 +281,7 @@ N_REGS
       rs_q            <= '0;
       rs_valid_q      <= '0;
       instr_id_q      <= '0;
-      datatype_q      <= matrix_cps_pkg::SIZE_32;
+      datatype_q      <= quadrilatero_pkg::SIZE_32;
       is_store_q      <= '0;
       is_float_q      <= '0;
 
@@ -333,9 +333,9 @@ N_REGS
   assign reg_md_o      = wreg_q;
 
   // Assertions 
-  if (matrix_cps_pkg::MAX_NUM_READ_OPERANDS != 3) begin
+  if (quadrilatero_pkg::MAX_NUM_READ_OPERANDS != 3) begin
     $error(
-        "[dispatcher] The matrix_cps_pkg::MAX_NUM_READ_OPERANDS needs to be 3 for the current implementation.\n"
+        "[dispatcher] The quadrilatero_pkg::MAX_NUM_READ_OPERANDS needs to be 3 for the current implementation.\n"
     );
   end
 endmodule
