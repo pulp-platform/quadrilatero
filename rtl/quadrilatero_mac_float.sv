@@ -30,15 +30,29 @@ module quadrilatero_mac_float (
   // Determine FPU unit signals
   // -------------------------------
   always_comb begin: gen_fpnew_signals
-    if (datatype_i == quadrilatero_pkg::SIZE_32) begin
-      operation  = fpnew_pkg::FMADD;
-      fp_src_fmt = fpnew_pkg::FP32 ;
-      op_vect    = 1'b0;
-    end else if (datatype_i == quadrilatero_pkg::SIZE_16) begin
-      operation  = fpnew_pkg::SDOTP;
-      fp_src_fmt = fpnew_pkg::FP16 ;
-      op_vect    = 1'b1;
-    end
+    operation  = fpnew_pkg::FMADD;
+    fp_src_fmt = fpnew_pkg::FP32 ;
+    op_vect    = 1'b0;
+
+    unique case (datatype_i)
+      quadrilatero_pkg::SIZE_32: begin
+        operation  = fpnew_pkg::FMADD;
+        fp_src_fmt = fpnew_pkg::FP32 ;
+        op_vect    = 1'b0;
+      end
+      quadrilatero_pkg::SIZE_16: begin
+        operation  = fpnew_pkg::SDOTP;
+        fp_src_fmt = fpnew_pkg::FP16 ;
+        op_vect    = 1'b1;
+      end
+      quadrilatero_pkg::SIZE_8: begin
+        operation  = fpnew_pkg::SDOTP;
+        fp_src_fmt = fpnew_pkg::FP8  ;
+        op_vect    = 1'b1;
+      end
+      default: begin
+      end
+    endcase
   end
 
   // -------------------------------
@@ -46,7 +60,7 @@ module quadrilatero_mac_float (
   // -------------------------------
   localparam fpnew_pkg::fpu_features_t RV32_QUAD = '{
     Width:         32,
-    EnableVectors: 1'b0,
+    EnableVectors: 1'b1,
     EnableNanBox:  1'b1,
     FpFmtMask:     6'b101100,
     IntFmtMask:    4'b0010
